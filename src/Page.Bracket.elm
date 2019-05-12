@@ -3,8 +3,8 @@ module Page.Bracket exposing (..)
 
 import Browser
 import Html exposing (Html)
-import Svg exposing (Svg, svg, text_, tspan)
-import Svg.Attributes exposing (dy, fontSize, height, viewBox, width, x, y)
+import Svg exposing (Svg, rect, svg, text_, tspan)
+import Svg.Attributes exposing (dy, fill, fontSize, height, preserveAspectRatio, viewBox, width, x, y)
 
 
 
@@ -62,14 +62,22 @@ subscriptions model =
 view: Model -> Html Msg
 view model =
   svg
-    [ width "500"
-    , height "500"
-    , viewBox "0 0 500 500"
+    [ width "100%"
+    , height "100%"
+    , viewBox "0 0 1600 900"
+    , preserveAspectRatio "none"
     ]
-    [ text_
+    [ rect
+      [ width "100%"
+      , height "100%"
+      , fill "#609"
+      ]
+      []
+     ,text_
       [ x "80"
       , y "80"
       , fontSize "20"
+      , fill "white"
       ]
       (render16 model.roundOf16)
     ]
