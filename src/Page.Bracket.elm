@@ -3,7 +3,7 @@ module Page.Bracket exposing (..)
 
 import Browser
 import Html exposing (Html)
-import Svg exposing (svg, text_, tspan)
+import Svg exposing (Svg, svg, text_, tspan)
 import Svg.Attributes exposing (dy, fontSize, height, viewBox, width, x, y)
 
 
@@ -19,12 +19,25 @@ main =
 
 
 type alias Model =
-  {
+  { title: String
+  , roundOf16: Maybe (List Contestant)
   }
+
+type alias Contestant =
+  { name: String }
 
 init: () -> (Model, Cmd Msg)
 init _ =
-  ( Model
+  ( { title = ""
+    , roundOf16 =
+      Just [
+        { name = "Bob"
+        }
+        ,
+        { name = "Charles"
+        }
+      ]
+    }
   , Cmd.none
   )
 
@@ -34,7 +47,7 @@ type Msg = Hi
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  ( Model
+  ( model
   , Cmd.none
   )
 
@@ -58,8 +71,16 @@ view model =
       , y "80"
       , fontSize "20"
       ]
-      [ tspan [ x "0", dy "1.2em" ] [ Svg.text "cool placeholder"]
-      ]
+      (render16 model.roundOf16)
     ]
 
 
+render16: Maybe (List Contestant) -> List (Svg.Svg Msg)
+render16 contestants =
+  case contestants of
+    Nothing -> []
+    Just val -> List.indexedMap renderContestant val
+
+renderContestant: Int -> Contestant -> Svg.Svg Msg
+renderContestant index contestant =
+  tspan [ x (String.fromInt (index * 10)), dy "1.2em" ] [ Svg.text contestant.name ]

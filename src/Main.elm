@@ -58,6 +58,10 @@ view model =
   { title = "Hi"
   , body =
       [ div []
-        [ h1 [] [ text "Hello world" ] ]
+        (List.map renderARow [1, 2, 3])
       ]
   }
+
+
+renderARow _ =
+    h1 [] [ text "Hello world" ]
