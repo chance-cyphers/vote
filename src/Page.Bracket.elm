@@ -119,6 +119,22 @@ renderBracket =
     , horizontalLine 1060 570
     , horizontalLine 890 420
     , horizontalLine 715 370
+    , verticalLine 200 130 80
+    , verticalLine 200 290 80
+    , verticalLine 200 450 80
+    , verticalLine 200 610 80
+    , verticalLine 370 170 160
+    , verticalLine 370 490 160
+    , verticalLine 540 260 310
+    , verticalLine 1400 130 80
+    , verticalLine 1400 290 80
+    , verticalLine 1400 450 80
+    , verticalLine 1400 610 80
+    , verticalLine 1230 170 160
+    , verticalLine 1230 490 160
+    , verticalLine 1060 260 310
+    , verticalLine 888 370 50
+    , verticalLine 712 370 50
     ]
 
 
@@ -128,7 +144,20 @@ horizontalLine x y =
     [ x1 <| String.fromInt x
     , x2 <| String.fromInt (x + 170)
     , y1 <| String.fromInt y
-    , y2 <| String.fromInt (y)
+    , y2 <| String.fromInt y
+    , stroke "#fff"
+    , strokeWidth "3"
+    , fill "none"
+    ]
+    []
+
+verticalLine: Int -> Int -> Int -> Svg.Svg Msg
+verticalLine x y size =
+  line
+    [ x1 <| String.fromInt x
+    , x2 <| String.fromInt x
+    , y1 <| String.fromInt y
+    , y2 <| String.fromInt (y + size)
     , stroke "#fff"
     , strokeWidth "3"
     , fill "none"
