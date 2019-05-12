@@ -88,37 +88,37 @@ renderBracket: Svg.Svg Msg
 renderBracket =
   Svg.g
     []
-    [ horizontalLine 50 130
-    , horizontalLine 50 210
-    , horizontalLine 50 290
-    , horizontalLine 50 370
-    , horizontalLine 50 450
-    , horizontalLine 50 530
-    , horizontalLine 50 610
-    , horizontalLine 50 690
-    , horizontalLine 220 170
-    , horizontalLine 220 330
-    , horizontalLine 220 490
-    , horizontalLine 220 650
-    , horizontalLine 390 260
-    , horizontalLine 390 570
-    , horizontalLine 560 420
-    , horizontalLine 1440 130
-    , horizontalLine 1440 210
-    , horizontalLine 1440 290
-    , horizontalLine 1440 370
-    , horizontalLine 1440 450
-    , horizontalLine 1440 530
-    , horizontalLine 1440 610
-    , horizontalLine 1440 690
-    , horizontalLine 1270 170
-    , horizontalLine 1270 330
-    , horizontalLine 1270 490
-    , horizontalLine 1270 650
-    , horizontalLine 1100 260
-    , horizontalLine 1100 570
-    , horizontalLine 930 420
-    , horizontalLine 735 370
+    [ horizontalLine 30 130
+    , horizontalLine 30 210
+    , horizontalLine 30 290
+    , horizontalLine 30 370
+    , horizontalLine 30 450
+    , horizontalLine 30 530
+    , horizontalLine 30 610
+    , horizontalLine 30 690
+    , horizontalLine 200 170
+    , horizontalLine 200 330
+    , horizontalLine 200 490
+    , horizontalLine 200 650
+    , horizontalLine 370 260
+    , horizontalLine 370 570
+    , horizontalLine 540 420
+    , horizontalLine 1400 130
+    , horizontalLine 1400 210
+    , horizontalLine 1400 290
+    , horizontalLine 1400 370
+    , horizontalLine 1400 450
+    , horizontalLine 1400 530
+    , horizontalLine 1400 610
+    , horizontalLine 1400 690
+    , horizontalLine 1230 170
+    , horizontalLine 1230 330
+    , horizontalLine 1230 490
+    , horizontalLine 1230 650
+    , horizontalLine 1060 260
+    , horizontalLine 1060 570
+    , horizontalLine 890 420
+    , horizontalLine 715 370
     ]
 
 
@@ -126,7 +126,7 @@ horizontalLine: Int -> Int -> Svg.Svg Msg
 horizontalLine x y =
   line
     [ x1 <| String.fromInt x
-    , x2 <| String.fromInt (x + 130)
+    , x2 <| String.fromInt (x + 170)
     , y1 <| String.fromInt y
     , y2 <| String.fromInt (y)
     , stroke "#fff"
