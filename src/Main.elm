@@ -20,14 +20,15 @@ main =
 
 
 type alias Model =
-    { greeting: String
-    }
+  { greeting: String
+  , key: Nav.Key
+  }
 
 init: () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
-init _ _ _ =
-    ( Model "Hello world"
-    , Cmd.none
-    )
+init _ _ key =
+  ( Model "Hello world" key
+  , Cmd.none
+  )
 
 
 
@@ -40,21 +41,21 @@ type Msg
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    ( model
-    , Cmd.none
-    )
+  ( model
+  , Cmd.none
+  )
 
 
 
 subscriptions: Model -> Sub Msg
 subscriptions model =
-    Sub.none
+  Sub.none
 
 
 
 view: Model -> Document Msg
 view model =
-  { title = ""
+  { title = "Hi"
   , body =
       [ div []
         [ h1 [] [ text "Hello world" ] ]
