@@ -169,8 +169,8 @@ render16: Maybe (List Contestant) -> List (Svg.Svg Msg)
 render16 contestants =
   case contestants of
     Nothing -> []
-    Just val -> List.indexedMap renderContestant val
+    Just val -> List.indexedMap renderContestantBracket val
 
-renderContestant: Int -> Contestant -> Svg.Svg Msg
-renderContestant index contestant =
+renderContestantBracket: Int -> Contestant -> Svg.Svg Msg
+renderContestantBracket index contestant =
   tspan [ x "55", y "120"] [ Svg.text contestant.name ]
