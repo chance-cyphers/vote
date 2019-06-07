@@ -1,0 +1,22 @@
+{
+  "name": "vote",
+  "version": "1.0.0",
+  "description": "",
+  "main": "elm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chance-cyphers/vote.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chance-cyphers/vote/issues"
+  },
+  "homepage": "https://github.com/chance-cyphers/vote#readme",
+  "dependencies": {
+    "elm": "^0.19.0-no-deps"
+  }
+}
