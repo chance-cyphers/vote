@@ -107,7 +107,7 @@ view model =
       , fontSize "32"
       , fill "white"
       ]
-      [ tspan [ x "50%", y "100", textAnchor "middle"] [ Svg.text model.title ]
+      [ tspan [ x "50%", y "110", textAnchor "middle"] [ Svg.text model.title ]
       ]
     ]
 
