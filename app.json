@@ -1,4 +1,6 @@
 {
+  "name": "Vote for Stuff",
+  "repository": "https://github.com/chance-cyphers/vote",
   "env": {
     "ELM_COMPILE": "elm make src/Main.elm --output main.js"
   },
