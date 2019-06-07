@@ -3,6 +3,7 @@ module Page.Bracket exposing (..)
 
 import Browser
 import Html exposing (Html)
+import Json.Decode exposing (Decoder, field, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http
@@ -45,10 +46,14 @@ init _ =
     }
   , Http.get
     { url = "https://tourney-service.herokuapp.com/tourney"
-    , expect = Http.expectString GotText
+    , expect = Http.expectJson GotText titleDecoder
     }
   )
 
+
+titleDecoder: Decoder String
+titleDecoder =
+    field "name" string
 
 
 type Msg
