@@ -4,8 +4,8 @@ module Page.Bracket exposing (..)
 import Browser
 import Html exposing (Html)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
-import Svg.Attributes exposing (dy, fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, viewBox, width, x, x1, x2, y, y1, y2)
-
+import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
+import Http
 
 
 main =
@@ -16,11 +16,15 @@ main =
     , subscriptions = subscriptions
     }
 
-
+type BracketStatus
+    = Failure
+    | Loading
+    | Success String
 
 type alias Model =
   { title: String
   , roundOf16: Maybe (List Contestant)
+  , status : BracketStatus
   }
 
 type alias Contestant =
@@ -28,7 +32,7 @@ type alias Contestant =
 
 init: () -> (Model, Cmd Msg)
 init _ =
-  ( { title = ""
+  ( { title = "Loading..."
     , roundOf16 =
       Just [
         { name = "Toothbrush"
@@ -37,19 +41,35 @@ init _ =
         { name = "Toothbrush"
         }
       ]
+    , status = Loading
     }
-  , Cmd.none
+  , Http.get
+    { url = "https://tourney-service.herokuapp.com/tourney"
+    , expect = Http.expectString GotText
+    }
   )
 
 
 
-type Msg = Hi
+type Msg
+    = Hi
+    | GotText(Result Http.Error String)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  ( model
-  , Cmd.none
-  )
+    case msg of
+        GotText result ->
+            case result of
+                Ok fullText ->
+                    ( { model | title = fullText }
+                    , Cmd.none
+                    )
+                Err _ ->
+                    ({ model | title = "whoops" }, Cmd.none)
+        _ ->
+            ( model
+            , Cmd.none
+            )
 
 
 
@@ -81,8 +101,21 @@ view model =
       , fill "white"
       ]
       (render16 model.roundOf16)
+    , text_
+      [ x "80"
+      , y "80"
+      , fontSize "32"
+      , fill "white"
+      ]
+      [ tspan [ x "50%", y "100", textAnchor "middle"] [ Svg.text model.title ]
+      ]
     ]
 
+
+
+
+
+--------Render the static bracket--------
 
 renderBracket: Svg.Svg Msg
 renderBracket =
