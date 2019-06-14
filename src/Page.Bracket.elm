@@ -8,7 +8,6 @@ import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http
 
-
 main =
   Browser.element
     { init = init
@@ -36,6 +35,48 @@ init _ =
   ( { title = "Loading..."
     , roundOf16 =
       Just [
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
+        { name = "Toothbrush"
+        }
+        ,
         { name = "Toothbrush"
         }
         ,
@@ -211,4 +252,8 @@ render16 contestants =
 
 renderContestantBracket: Int -> Contestant -> Svg.Svg Msg
 renderContestantBracket index contestant =
-  tspan [ x "55", y "120"] [ Svg.text contestant.name ]
+  let
+    yPos = remainderBy (80 * 8) (index * 80) + 120
+    xPos = if index < 8 then 55 else 1420
+  in
+    tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
