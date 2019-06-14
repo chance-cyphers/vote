@@ -53,7 +53,7 @@ init _ =
     , status = Loading
     }
   , Http.get
-    { url = "https://tourney-service.herokuapp.com/tourney"
+    { url = "https://tourney-service.herokuapp.com/tourney/bracket/example"
     , expect = Http.expectJson GotBracket bracketDecoder
     }
   )
@@ -105,7 +105,7 @@ view model =
     headerText =
      case model.status of
        Loading -> "Loading..."
-       Failure e -> "Something went wrong!" ++ (toString e)
+       Failure _ -> "Something went wrong!"
        Success -> model.bracket.title
   in
     svg
