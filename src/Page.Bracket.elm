@@ -87,7 +87,14 @@ subscriptions model =
 
 view: Model -> Html Msg
 view model =
-  svg
+  let
+    headerText =
+     case model.status of
+       Loading -> "Loading..."
+       Failure -> "Something went wrong!"
+       Success -> model.bracket.title
+  in
+    svg
     [ width "100%"
     , height "100%"
     , viewBox "0 0 1600 800"
@@ -115,7 +122,7 @@ view model =
       ]
       [ tspan
         [ x "50%", y "110", textAnchor "middle"]
-        [ Svg.text (if model.status == Loading then "Loading..." else model.bracket.title) ]
+        [ Svg.text headerText ]
       ]
     ]
 
