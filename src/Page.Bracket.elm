@@ -3,7 +3,7 @@ module Page.Bracket exposing (..)
 
 import Browser
 import Html exposing (Html)
-import Json.Decode exposing (Decoder, field, string)
+import Json.Decode exposing (Decoder, field, list, map, map2, nullable, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http
@@ -16,106 +16,72 @@ main =
     , subscriptions = subscriptions
     }
 
+type alias Model =
+  { bracket: Bracket
+  , status : BracketStatus
+  }
+
+type alias Bracket =
+  { title: String
+  , roundOf16: Maybe (List Contestant)
+  }
+
 type BracketStatus
     = Failure
     | Loading
-    | Success String
-
-type alias Model =
-  { title: String
-  , roundOf16: Maybe (List Contestant)
-  , status : BracketStatus
-  }
 
 type alias Contestant =
   { name: String }
 
+
 init: () -> (Model, Cmd Msg)
 init _ =
-  ( { title = "Loading..."
-    , roundOf16 =
-      Just [
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-        ,
-        { name = "Toothbrush"
-        }
-      ]
+  ( { bracket =
+      { title = "Loading..."
+      , roundOf16 =
+        Just [
+          { name = "Toothbrush"
+          }
+          ,
+          { name = "Toothbrush"
+          }
+        ]
+      }
     , status = Loading
     }
   , Http.get
     { url = "https://tourney-service.herokuapp.com/tourney"
-    , expect = Http.expectJson GotText titleDecoder
+    , expect = Http.expectJson GotBracket bracketDecoder
     }
   )
 
 
-titleDecoder: Decoder String
-titleDecoder =
-    field "name" string
+contestantDecoder: Decoder Contestant
+contestantDecoder =
+    map Contestant (field "name" string)
+
+
+bracketDecoder: Decoder Bracket
+bracketDecoder =
+  map2 Bracket
+    (field "name" string)
+    (field "roundOf16" (nullable (list contestantDecoder)))
 
 
 type Msg
-    = Hi
-    | GotText(Result Http.Error String)
+    = GotBracket(Result Http.Error Bracket)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        GotText result ->
+        GotBracket result ->
             case result of
-                Ok fullText ->
-                    ( { model | title = fullText }
+                Ok bracket ->
+                    ( { model | bracket = bracket }
                     , Cmd.none
                     )
                 Err _ ->
-                    ({ model | title = "whoops" }, Cmd.none)
-        _ ->
-            ( model
-            , Cmd.none
-            )
+                    ({ model | status = Failure }, Cmd.none)
 
 
 
@@ -146,14 +112,14 @@ view model =
       , fontSize "16"
       , fill "white"
       ]
-      (render16 model.roundOf16)
+      (render16 model.bracket.roundOf16)
     , text_
       [ x "80"
       , y "80"
       , fontSize "32"
       , fill "white"
       ]
-      [ tspan [ x "50%", y "110", textAnchor "middle"] [ Svg.text model.title ]
+      [ tspan [ x "50%", y "110", textAnchor "middle"] [ Svg.text model.bracket.title ]
       ]
     ]
 
