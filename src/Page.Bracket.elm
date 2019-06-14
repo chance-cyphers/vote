@@ -2,9 +2,9 @@ module Page.Bracket exposing (..)
 
 
 import Browser
-import Debug exposing (toString)
+import Debug exposing (log, toString)
 import Html exposing (Html)
-import Json.Decode exposing (Decoder, field, list, map, map3, map5, nullable, string)
+import Json.Decode exposing (Decoder, field, list, map, map6, maybe, nullable, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
@@ -28,6 +28,7 @@ type alias Bracket =
   , roundOf8: Maybe (List Contestant)
   , semiFinals: Maybe (List Contestant)
   , finals: Maybe (List Contestant)
+  , winner: Maybe Contestant
   }
 
 type FetchStatus
@@ -43,10 +44,11 @@ init: () -> (Model, Cmd Msg)
 init _ =
   ( { bracket =
       { title = ""
-      , roundOf16 = Just []
-      , roundOf8 = Just []
-      , semiFinals = Just []
-      , finals = Just []
+      , roundOf16 = Nothing
+      , roundOf8 = Nothing
+      , semiFinals = Nothing
+      , finals = Nothing
+      , winner = Nothing
       }
     , status = Loading
     }
@@ -64,12 +66,13 @@ contestantDecoder =
 
 bracketDecoder: Decoder Bracket
 bracketDecoder =
-  map5 Bracket
+  map6 Bracket
     (field "name" string)
     (field "roundOf16" (nullable (list contestantDecoder)))
     (field "roundOf8" (nullable (list contestantDecoder)))
     (field "semiFinals" (nullable (list contestantDecoder)))
     (field "finals" (nullable (list contestantDecoder)))
+    (maybe (field "winner" contestantDecoder))
 
 
 type Msg
@@ -81,6 +84,7 @@ update msg model =
         GotBracket result ->
             case result of
                 Ok bracket ->
+                    log (toString bracket)
                     ( { model | bracket = bracket, status = Success }
                     , Cmd.none
                     )
@@ -101,7 +105,7 @@ view model =
     headerText =
      case model.status of
        Loading -> "Loading..."
-       Failure _ -> "Something went wrong!"
+       Failure e -> "Something went wrong!" ++ (toString e)
        Success -> model.bracket.title
   in
     svg
@@ -145,6 +149,13 @@ view model =
       , fill "white"
       ]
       (renderFinals model.bracket.finals)
+    , text_
+      [ x "80"
+      , y "80"
+      , fontSize "16"
+      , fill "white"
+      ]
+      [(renderWinner model.bracket.winner)]
     , text_
       [ x "80"
       , y "80"
@@ -309,3 +320,11 @@ renderFinalsContestant index contestant =
     tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
 
 
+renderWinner: Maybe Contestant -> Svg.Svg Msg
+renderWinner contestant =
+  let
+    name = case contestant of
+      Nothing -> ""
+      Just c -> c.name
+  in
+    tspan [ x "760", y "360"] [ Svg.text name ]
