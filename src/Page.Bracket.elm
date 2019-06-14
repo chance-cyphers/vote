@@ -117,7 +117,7 @@ view model =
     , text_
       [ x "80"
       , y "80"
-      , fontSize "32"
+      , fontSize "42"
       , fill "white"
       ]
       [ tspan
@@ -193,7 +193,7 @@ horizontalLine x y =
     , x2 <| String.fromInt (x + 170)
     , y1 <| String.fromInt y
     , y2 <| String.fromInt y
-    , stroke "#fff"
+    , stroke "magenta"
     , strokeWidth "3"
     , fill "none"
     ]
@@ -206,7 +206,7 @@ verticalLine x y size =
     , x2 <| String.fromInt x
     , y1 <| String.fromInt y
     , y2 <| String.fromInt (y + size)
-    , stroke "#fff"
+    , stroke "magenta"
     , strokeWidth "3"
     , fill "none"
     ]
@@ -223,6 +223,6 @@ renderContestantBracket: Int -> Contestant -> Svg.Svg Msg
 renderContestantBracket index contestant =
   let
     yPos = remainderBy (80 * 8) (index * 80) + 120
-    xPos = if index < 8 then 55 else 1420
+    xPos = if index < 8 then 36 else 1410
   in
     tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
