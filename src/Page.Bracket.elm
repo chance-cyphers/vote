@@ -2,11 +2,12 @@ module Page.Bracket exposing (..)
 
 
 import Browser
+import Debug exposing (toString)
 import Html exposing (Html)
-import Json.Decode exposing (Decoder, field, list, map, map2, nullable, string)
+import Json.Decode exposing (Decoder, field, list, map, map3, nullable, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
-import Http
+import Http exposing (Error)
 
 main =
   Browser.element
@@ -18,16 +19,17 @@ main =
 
 type alias Model =
   { bracket: Bracket
-  , status : BracketStatus
+  , status : FetchStatus
   }
 
 type alias Bracket =
   { title: String
   , roundOf16: Maybe (List Contestant)
+  , roundOf8: Maybe (List Contestant)
   }
 
-type BracketStatus
-    = Failure
+type FetchStatus
+    = Failure String
     | Loading
     | Success
 
@@ -40,6 +42,7 @@ init _ =
   ( { bracket =
       { title = ""
       , roundOf16 = Just []
+      , roundOf8 = Just []
       }
     , status = Loading
     }
@@ -57,9 +60,10 @@ contestantDecoder =
 
 bracketDecoder: Decoder Bracket
 bracketDecoder =
-  map2 Bracket
+  map3 Bracket
     (field "name" string)
     (field "roundOf16" (nullable (list contestantDecoder)))
+    (field "roundOf8" (nullable (list contestantDecoder)))
 
 
 type Msg
@@ -74,8 +78,8 @@ update msg model =
                     ( { model | bracket = bracket, status = Success }
                     , Cmd.none
                     )
-                Err _ ->
-                    ({ model | status = Failure }, Cmd.none)
+                Err e ->
+                    ({ model | status = Failure (toString e) }, Cmd.none)
 
 
 
@@ -91,7 +95,7 @@ view model =
     headerText =
      case model.status of
        Loading -> "Loading..."
-       Failure -> "Something went wrong!"
+       Failure _ -> "Something went wrong!"
        Success -> model.bracket.title
   in
     svg
@@ -114,6 +118,13 @@ view model =
       , fill "white"
       ]
       (render16 model.bracket.roundOf16)
+    , text_
+      [ x "80"
+      , y "80"
+      , fontSize "16"
+      , fill "white"
+      ]
+      (render8 model.bracket.roundOf8)
     , text_
       [ x "80"
       , y "80"
@@ -213,16 +224,37 @@ verticalLine x y size =
     []
 
 
+
+
+--------Render contestants--------
+
+
 render16: Maybe (List Contestant) -> List (Svg.Svg Msg)
 render16 contestants =
   case contestants of
     Nothing -> []
-    Just val -> List.indexedMap renderContestantBracket val
+    Just val -> List.indexedMap render16Contestant val
 
-renderContestantBracket: Int -> Contestant -> Svg.Svg Msg
-renderContestantBracket index contestant =
+render16Contestant: Int -> Contestant -> Svg.Svg Msg
+render16Contestant index contestant =
   let
     yPos = remainderBy (80 * 8) (index * 80) + 120
     xPos = if index < 8 then 36 else 1410
   in
     tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
+
+
+render8: Maybe (List Contestant) -> List (Svg.Svg Msg)
+render8 contestants =
+    case contestants of
+        Nothing -> []
+        Just val -> List.indexedMap render8Contestant val
+
+render8Contestant: Int -> Contestant -> Svg.Svg Msg
+render8Contestant index contestant =
+  let
+    yPos = remainderBy (160 * 4) (index * 160) + 160
+    xPos = if index < 4 then 216 else 1250
+  in
+    tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
+
