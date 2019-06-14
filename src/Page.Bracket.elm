@@ -4,7 +4,7 @@ module Page.Bracket exposing (..)
 import Browser
 import Debug exposing (toString)
 import Html exposing (Html)
-import Json.Decode exposing (Decoder, field, list, map, map3, nullable, string)
+import Json.Decode exposing (Decoder, field, list, map, map3, map5, nullable, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
@@ -26,6 +26,8 @@ type alias Bracket =
   { title: String
   , roundOf16: Maybe (List Contestant)
   , roundOf8: Maybe (List Contestant)
+  , semiFinals: Maybe (List Contestant)
+  , finals: Maybe (List Contestant)
   }
 
 type FetchStatus
@@ -43,6 +45,8 @@ init _ =
       { title = ""
       , roundOf16 = Just []
       , roundOf8 = Just []
+      , semiFinals = Just []
+      , finals = Just []
       }
     , status = Loading
     }
@@ -60,10 +64,12 @@ contestantDecoder =
 
 bracketDecoder: Decoder Bracket
 bracketDecoder =
-  map3 Bracket
+  map5 Bracket
     (field "name" string)
     (field "roundOf16" (nullable (list contestantDecoder)))
     (field "roundOf8" (nullable (list contestantDecoder)))
+    (field "semiFinals" (nullable (list contestantDecoder)))
+    (field "finals" (nullable (list contestantDecoder)))
 
 
 type Msg
@@ -125,6 +131,20 @@ view model =
       , fill "white"
       ]
       (render8 model.bracket.roundOf8)
+    , text_
+      [ x "80"
+      , y "80"
+      , fontSize "16"
+      , fill "white"
+      ]
+      (renderSemis model.bracket.semiFinals)
+    , text_
+      [ x "80"
+      , y "80"
+      , fontSize "16"
+      , fill "white"
+      ]
+      (renderFinals model.bracket.finals)
     , text_
       [ x "80"
       , y "80"
@@ -254,7 +274,38 @@ render8Contestant: Int -> Contestant -> Svg.Svg Msg
 render8Contestant index contestant =
   let
     yPos = remainderBy (160 * 4) (index * 160) + 160
-    xPos = if index < 4 then 216 else 1250
+    xPos = if index < 4 then 210 else 1240
   in
     tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
+
+
+renderSemis: Maybe (List Contestant) -> List (Svg.Svg Msg)
+renderSemis contestants =
+    case contestants of
+        Nothing -> []
+        Just val -> List.indexedMap renderSemisContestant val
+
+renderSemisContestant: Int -> Contestant -> Svg.Svg Msg
+renderSemisContestant index contestant =
+  let
+    yPos = remainderBy (310 * 2) (index * 310) + 250
+    xPos = if index < 2 then 380 else 1070
+  in
+    tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
+
+
+renderFinals: Maybe (List Contestant) -> List (Svg.Svg Msg)
+renderFinals contestants =
+    case contestants of
+        Nothing -> []
+        Just val -> List.indexedMap renderFinalsContestant val
+
+renderFinalsContestant: Int -> Contestant -> Svg.Svg Msg
+renderFinalsContestant index contestant =
+  let
+    yPos = 410
+    xPos = if index == 0 then 580 else 930
+  in
+    tspan [ x (String.fromInt xPos), y (String.fromInt yPos)] [ Svg.text contestant.name ]
+
 
