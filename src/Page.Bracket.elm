@@ -68,10 +68,10 @@ bracketDecoder: Decoder Bracket
 bracketDecoder =
   map6 Bracket
     (field "name" string)
-    (field "roundOf16" (nullable (list contestantDecoder)))
-    (field "roundOf8" (nullable (list contestantDecoder)))
-    (field "semiFinals" (nullable (list contestantDecoder)))
-    (field "finals" (nullable (list contestantDecoder)))
+    (maybe (field "roundOf16" (list contestantDecoder)))
+    (maybe (field "roundOf8" (list contestantDecoder)))
+    (maybe (field "semiFinals" (list contestantDecoder)))
+    (maybe (field "finals" (list contestantDecoder)))
     (maybe (field "winner" contestantDecoder))
 
 
