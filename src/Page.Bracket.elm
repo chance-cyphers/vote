@@ -29,6 +29,7 @@ type alias Bracket =
 type BracketStatus
     = Failure
     | Loading
+    | Success
 
 type alias Contestant =
   { name: String }
@@ -37,15 +38,8 @@ type alias Contestant =
 init: () -> (Model, Cmd Msg)
 init _ =
   ( { bracket =
-      { title = "Loading..."
-      , roundOf16 =
-        Just [
-          { name = "Toothbrush"
-          }
-          ,
-          { name = "Toothbrush"
-          }
-        ]
+      { title = ""
+      , roundOf16 = Just []
       }
     , status = Loading
     }
@@ -77,7 +71,7 @@ update msg model =
         GotBracket result ->
             case result of
                 Ok bracket ->
-                    ( { model | bracket = bracket }
+                    ( { model | bracket = bracket, status = Success }
                     , Cmd.none
                     )
                 Err _ ->
@@ -119,7 +113,9 @@ view model =
       , fontSize "32"
       , fill "white"
       ]
-      [ tspan [ x "50%", y "110", textAnchor "middle"] [ Svg.text model.bracket.title ]
+      [ tspan
+        [ x "50%", y "110", textAnchor "middle"]
+        [ Svg.text (if model.status == Loading then "Loading..." else model.bracket.title) ]
       ]
     ]
 
