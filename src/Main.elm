@@ -7,7 +7,7 @@ import Html exposing (Html, a, div, h1, h3, li, text)
 import Html.Attributes exposing (href)
 import Page.Bracket exposing (Model, init)
 import Url
-import Route exposing (Route)
+import Route exposing (Route(..))
 
 
 main =
@@ -83,10 +83,10 @@ update msg model =
           ( model, Nav.load href )
     (UrlChanged url, _) ->
       let
-        route = Route.parseRoute url
+        (route, pageModel, cmd) = updateRoute url
       in
-        ( { model | route = route }
-        , Cmd.none
+        ( { model | route = route, pageModel = pageModel }
+        , cmd
         )
     (BracketMsg bMsg, BracketModel bModel) ->
       let
@@ -96,6 +96,25 @@ update msg model =
         , Cmd.map BracketMsg newCmd)
     (_, _) ->
       (model, Cmd.none)
+
+
+
+updateRoute url =
+    let route = Route.parseRoute url
+    in
+      case route of
+        Bracket ->
+          let
+            (bracketModel, bracketCmd) = Page.Bracket.init ()
+            model = BracketModel bracketModel
+            command = Cmd.map BracketMsg bracketCmd
+          in
+            (route, model, command)
+        _ ->
+            (Home, HomeModel, Cmd.none)
+
+
+
 
 
 subscriptions: Model -> Sub Msg
@@ -109,11 +128,16 @@ view model =
   { title = "Hi"
   , body =
       [ h1 [] [ text (toString model.route)]
-      , div [] (List.map renderARow [1, 2, 3])
+      , pageContent model
       , viewLink "#/bracket"
       ]
   }
 
+pageContent : Model -> Html Msg
+pageContent model =
+    case model.pageModel of
+        HomeModel -> div [] (List.map renderARow [1, 2, 3])
+        BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
 
 renderARow _ =
     h3 [] [ text "Hello world" ]
