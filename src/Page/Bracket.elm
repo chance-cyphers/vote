@@ -1,10 +1,10 @@
-module Page.Bracket exposing (..)
+module Page.Bracket exposing (Model)
 
 
 import Browser
-import Debug exposing (log, toString)
+import Debug exposing (toString)
 import Html exposing (Html)
-import Json.Decode exposing (Decoder, field, list, map, map6, maybe, nullable, string)
+import Json.Decode exposing (Decoder, field, list, map, map6, maybe, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
@@ -84,7 +84,6 @@ update msg model =
         GotBracket result ->
             case result of
                 Ok bracket ->
-                    log (toString bracket)
                     ( { model | bracket = bracket, status = Success }
                     , Cmd.none
                     )
