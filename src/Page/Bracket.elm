@@ -1,4 +1,4 @@
-module Page.Bracket exposing (Model)
+module Page.Bracket exposing (Model, init, Msg, update)
 
 
 import Browser
