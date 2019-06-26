@@ -2,13 +2,13 @@ module Main exposing (..)
 
 import Browser exposing (Document)
 import Browser.Navigation as Nav
-import Html exposing (Html)
+import Html exposing (Html, h1, text)
 import Http
 import Json.Decode as Decode
 import Page.Bracket exposing (Model, init)
 import Page.CreateTourney
 import Page.Home
-import Url
+import Url exposing (Url)
 import Route exposing (Route(..))
 
 
@@ -37,6 +37,7 @@ type PageModel
   = HomeModel
   | BracketModel Page.Bracket.Model
   | CreateTourneyModel Page.CreateTourney.Model
+  | NotFoundModel
 
 
 -- INIT
@@ -129,6 +130,7 @@ update msg model =
 
 
 
+updateRoute: Url -> (Route, PageModel, Cmd Msg)
 updateRoute url =
     let route = Route.parseRoute url
     in
@@ -145,8 +147,9 @@ updateRoute url =
             (createModel, createCmd) = Page.CreateTourney.init
           in
             (route, CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
-        _ ->
-            (Home, HomeModel, Cmd.none)
+        Home -> (Home, HomeModel, Cmd.none)
+        NotFound -> (NotFound, NotFoundModel, Cmd.none)
+
 
 
 subscriptions: Model -> Sub Msg
@@ -169,3 +172,4 @@ pageContent model =
         HomeModel -> Page.Home.view
         BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
         CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
+        NotFoundModel -> h1 [] [ text "404 Page Not Found" ]
