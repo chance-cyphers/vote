@@ -3,6 +3,8 @@ module Main exposing (..)
 import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Html exposing (Html)
+import Http
+import Json.Decode as Decode
 import Page.Bracket exposing (Model, init)
 import Page.CreateTourney
 import Page.Home
@@ -26,8 +28,10 @@ type alias Model =
   { route: Route
   , pageModel: PageModel
   , key: Nav.Key
+  , links: Links
   }
 
+type alias Links = { allTourneys: String }
 
 type PageModel
   = HomeModel
@@ -44,9 +48,15 @@ init _ url navKey =
     route = Route.parseRoute url
     (pageModel, _) = initPageModel route
   in
-    ( Model route pageModel navKey
-    , Cmd.none
+    ( Model route pageModel navKey { allTourneys = "" }
+    , Http.get
+      { url = "https://tourney-service.herokuapp.com/tourney"
+      , expect = Http.expectJson GotLinks linksDecoder}
     )
+
+linksDecoder: Decode.Decoder Links
+linksDecoder =
+  Decode.map Links (Decode.field "links" (Decode.field "allTourneysLink" Decode.string))
 
 
 initPageModel : Route -> ( PageModel, Cmd Msg )
@@ -74,6 +84,7 @@ type Msg
   | UrlChanged Url.Url
   | BracketMsg Page.Bracket.Msg
   | CreateTourneyMsg Page.CreateTourney.Msg
+  | GotLinks (Result Http.Error Links)
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -85,6 +96,7 @@ update msg model =
           ( model, Nav.pushUrl model.key (Url.toString url) )
         Browser.External href ->
           ( model, Nav.load href )
+
     (UrlChanged url, _) ->
       let
         (route, pageModel, cmd) = updateRoute url
@@ -92,6 +104,7 @@ update msg model =
         ( { model | route = route, pageModel = pageModel }
         , cmd
         )
+
     (BracketMsg bMsg, BracketModel bModel) ->
       let
         (newModel, newCmd) = Page.Bracket.update bMsg bModel
@@ -99,6 +112,7 @@ update msg model =
         ({model | pageModel = BracketModel newModel}
         , Cmd.map BracketMsg newCmd
         )
+
     (CreateTourneyMsg cMsg, CreateTourneyModel cModel) ->
       let
         (newModel, newCmd) = Page.CreateTourney.update cMsg cModel
@@ -106,8 +120,12 @@ update msg model =
         ({model | pageModel = CreateTourneyModel newModel}
         , Cmd.map CreateTourneyMsg newCmd
         )
-    (_, _) ->
+    (GotLinks links, _) ->
+      let _ = Debug.log "links" links
+      in
       (model, Cmd.none)
+
+    (_, _) -> (model, Cmd.none)
 
 
 
