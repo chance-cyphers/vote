@@ -24,7 +24,6 @@ main =
 type alias Model =
   { route: Route
   , pageModel: PageModel
-  , greeting: String
   , key: Nav.Key
   }
 
@@ -43,7 +42,7 @@ init _ url navKey =
     route = Route.parseRoute url
     (pageModel, _) = initPageModel route
   in
-    ( Model route pageModel "Hello world" navKey
+    ( Model route pageModel navKey
     , Cmd.none
     )
 
