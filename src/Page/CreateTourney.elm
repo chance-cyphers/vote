@@ -1,11 +1,12 @@
 module Page.CreateTourney exposing (..)
 
-
-
 import Dict exposing (Dict, get)
-import Html exposing (Html, div, h1, input, text)
+import Html exposing (Html, button, div, h1, input, text)
 import Html.Attributes exposing (class, placeholder, step, type_, value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
+import Http
+import Json.Encode as Encode
+import List exposing (map)
 import String exposing (toInt)
 type alias Model =
     { title: String
@@ -34,13 +35,15 @@ type Msg
   | Title String
   | MatchDuration String
   | Character String String
+  | Submit
+  | CreatedTourney (Result Http.Error String)
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  let _ = Debug.log "update msg" msg
-      _ = Debug.log "update model" model
-  in
+--  let _ = Debug.log "update msg" msg
+--      _ = Debug.log "update model" model
+--  in
   case msg of
       Hi -> (model, Cmd.none)
       Title title -> ({model | title = title}, Cmd.none)
@@ -53,7 +56,35 @@ update msg model =
         in
           ({model | matchDuration = parsedDuration}, Cmd.none)
       Character pos name -> ({model | characters = Dict.insert pos name model.characters}, Cmd.none)
+      Submit ->
+        let
+          body = tourneyEncoder model
+          _ = Debug.log "submit" body
+        in
+        ( model
+        , Http.post
+          { url = "https://tourney-service.herokuapp.com/tourney/tourney"
+          , body = Http.jsonBody <| tourneyEncoder model
+          , expect = Http.expectString CreatedTourney
+          }
+        )
+      CreatedTourney _ ->
+        (model, Cmd.none)
 
+
+tourneyEncoder: Model -> Encode.Value
+tourneyEncoder model =
+  Encode.object
+    [ ("title", Encode.string model.title)
+    , ("match_duration", Encode.int model.matchDuration)
+    , ("characters", Dict.values model.characters
+        |> Encode.list characterEncoder
+      )
+    ]
+
+characterEncoder: String -> Encode.Value
+characterEncoder name =
+    Encode.object [ ("name", Encode.string name) ]
 
 
 -- VIEW
@@ -80,6 +111,7 @@ view model =
       , characterInput "c14" model.characters
       , characterInput "c15" model.characters
       , characterInput "c16" model.characters
+      , button [ onClick Submit ] [ text "Create" ]
       ]
 
 

@@ -78,8 +78,6 @@ type Msg
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
---  let _ = Debug.log "update" model
---  in
   case (msg, model.pageModel) of
     (LinkClicked urlRequest, _) ->
       case urlRequest of
