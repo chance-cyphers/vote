@@ -2,10 +2,9 @@ module Main exposing (..)
 
 import Browser exposing (Document)
 import Browser.Navigation as Nav
-import Debug exposing (toString)
-import Html exposing (Html, a, div, h1, h3, li, text)
-import Html.Attributes exposing (href)
+import Html exposing (Html)
 import Page.Bracket exposing (Model, init)
+import Page.Home
 import Url
 import Route exposing (Route(..))
 
@@ -127,22 +126,12 @@ view: Model -> Document Msg
 view model =
   { title = "Hi"
   , body =
-      [ h1 [] [ text (toString model.route)]
-      , pageContent model
-      , viewLink "#/bracket"
+      [ pageContent model
       ]
   }
 
 pageContent : Model -> Html Msg
 pageContent model =
     case model.pageModel of
-        HomeModel -> div [] (List.map renderARow [1, 2, 3])
+        HomeModel -> Page.Home.view
         BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
-
-renderARow _ =
-    h3 [] [ text "Hello world" ]
-
-
-viewLink : String -> Html msg
-viewLink path =
-  li [] [ a [ href path ] [ text path ] ]
