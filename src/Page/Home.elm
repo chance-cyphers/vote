@@ -8,8 +8,9 @@ type Msg = Hi
 view: Html a
 view =
     div []
-      [ h1 [] [ text "Hello from Home" ]
+      [ h1 [] [ text "Home Page" ]
       , viewLink "#/bracket"
+      , viewLink "#/create"
       ]
 
 

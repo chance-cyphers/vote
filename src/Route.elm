@@ -6,6 +6,7 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 type Route
     = Home
     | Bracket
+    | CreateTourney
     | NotFound
 
 
@@ -21,6 +22,7 @@ parser =
     oneOf
         [ Parser.map Home Parser.top
         , Parser.map Bracket (s "bracket")
+        , Parser.map CreateTourney (s "create")
         ]
 
 urlFragmentToPath : Url -> Url

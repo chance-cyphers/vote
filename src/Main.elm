@@ -4,6 +4,7 @@ import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Page.Bracket exposing (Model, init)
+import Page.CreateTourney
 import Page.Home
 import Url
 import Route exposing (Route(..))
@@ -31,6 +32,7 @@ type alias Model =
 type PageModel
   = HomeModel
   | BracketModel Page.Bracket.Model
+  | CreateTourneyModel Page.CreateTourney.Model
 
 
 -- INIT
@@ -57,6 +59,11 @@ initPageModel route =
           (bracketModel, bracketCmd) = Page.Bracket.init ()
         in
           (BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
+      Route.CreateTourney ->
+        let
+          (createModel, createCmd) = Page.CreateTourney.init
+        in
+          (CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
       Route.NotFound ->
         (HomeModel, Cmd.none)
 
@@ -66,12 +73,13 @@ type Msg
   = LinkClicked Browser.UrlRequest
   | UrlChanged Url.Url
   | BracketMsg Page.Bracket.Msg
+  | CreateTourneyMsg Page.CreateTourney.Msg
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  let _ = Debug.log "update" model
-  in
+--  let _ = Debug.log "update" model
+--  in
   case (msg, model.pageModel) of
     (LinkClicked urlRequest, _) ->
       case urlRequest of
@@ -91,7 +99,15 @@ update msg model =
         (newModel, newCmd) = Page.Bracket.update bMsg bModel
       in
         ({model | pageModel = BracketModel newModel}
-        , Cmd.map BracketMsg newCmd)
+        , Cmd.map BracketMsg newCmd
+        )
+    (CreateTourneyMsg cMsg, CreateTourneyModel cModel) ->
+      let
+        (newModel, newCmd) = Page.CreateTourney.update cMsg cModel
+      in
+        ({model | pageModel = CreateTourneyModel newModel}
+        , Cmd.map CreateTourneyMsg newCmd
+        )
     (_, _) ->
       (model, Cmd.none)
 
@@ -108,11 +124,13 @@ updateRoute url =
             command = Cmd.map BracketMsg bracketCmd
           in
             (route, model, command)
+        CreateTourney ->
+          let
+            (createModel, createCmd) = Page.CreateTourney.init
+          in
+            (route, CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
         _ ->
             (Home, HomeModel, Cmd.none)
-
-
-
 
 
 subscriptions: Model -> Sub Msg
@@ -134,3 +152,4 @@ pageContent model =
     case model.pageModel of
         HomeModel -> Page.Home.view
         BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
+        CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel

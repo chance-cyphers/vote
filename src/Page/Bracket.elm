@@ -101,7 +101,6 @@ subscriptions model =
 view: Model -> Html Msg
 view model =
   let
-    _ = Debug.log "woop" "woopoiu"
     headerText =
      case model.status of
        Loading -> "Loading..."
