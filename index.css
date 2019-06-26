@@ -1,0 +1,12 @@
+body {
+    background-color: #609;
+    color: whitesmoke;
+}
+
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    color: whitesmoke;
+}

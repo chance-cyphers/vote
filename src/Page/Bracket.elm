@@ -113,13 +113,7 @@ view model =
     , viewBox "0 0 1600 800"
     , preserveAspectRatio "none"
     ]
-    [ rect
-      [ width "100%"
-      , height "100%"
-      , fill "#609"
-      ]
-      []
-    , renderBracket
+    [ renderBracket
      ,text_
       [ x "80"
       , y "80"
