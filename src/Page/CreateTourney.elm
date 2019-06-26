@@ -1,8 +1,8 @@
 module Page.CreateTourney exposing (..)
 
 import Dict exposing (Dict, get)
-import Html exposing (Html, button, div, h1, input, text)
-import Html.Attributes exposing (class, placeholder, step, type_, value)
+import Html exposing (Html, button, div, h1, input, p, text)
+import Html.Attributes as Html exposing (class, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Encode as Encode
@@ -17,14 +17,21 @@ type alias Model =
     { title: String
     , matchDuration: Int
     , characters: Dict Int String
+    , requestStatus: RequestStatus
     }
 
+type RequestStatus
+  = Loading
+  | Failure String
+  | Success
+  | NotEvenHappenedYetAtAll
 
 init: (Model, Cmd Msg)
 init =
     ({ title = ""
       , matchDuration = 0
       , characters = Dict.empty
+      , requestStatus = NotEvenHappenedYetAtAll
       }
     , Cmd.none
     )
@@ -43,9 +50,6 @@ type Msg
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
---  let _ = Debug.log "update msg" msg
---      _ = Debug.log "update model" model
---  in
   case msg of
       Hi -> (model, Cmd.none)
       Title title -> ({model | title = title}, Cmd.none)
@@ -63,15 +67,17 @@ update msg model =
           body = tourneyEncoder model
           _ = Debug.log "submit" body
         in
-        ( model
+        ( { model | requestStatus = Loading }
         , Http.post
           { url = "https://tourney-service.herokuapp.com/tourney/tourney"
           , body = Http.jsonBody <| tourneyEncoder model
           , expect = Http.expectString CreatedTourney
           }
         )
-      CreatedTourney _ ->
-        (model, Cmd.none)
+      CreatedTourney result ->
+        case result of
+          Ok _ -> ({ model | requestStatus = Success }, Cmd.none)
+          Err e -> ({ model | requestStatus = Failure <| Debug.toString e }, Cmd.none)
 
 
 tourneyEncoder: Model -> Encode.Value
@@ -96,7 +102,7 @@ view model =
     div [ class "create-tourney" ]
       [ h1 [] [ text "Create page" ]
       , input [ type_ "text", placeholder "Title", value model.title, onInput Title] []
-      , input [ type_ "number", step "1", placeholder "Match Duration", value (Debug.toString model.matchDuration), onInput MatchDuration] []
+      , input [ type_ "number", step "1", Html.min "1", placeholder "Match Duration", value (Debug.toString model.matchDuration), onInput MatchDuration] []
       , characterInput 1 model.characters
       , characterInput 2 model.characters
       , characterInput 3 model.characters
@@ -114,6 +120,7 @@ view model =
       , characterInput 15 model.characters
       , characterInput 16 model.characters
       , button [ onClick Submit ] [ text "Create" ]
+      , viewError model.requestStatus
       ]
 
 
@@ -130,3 +137,15 @@ getCharacter pos dict =
     case maybeChar of
       Nothing -> ""
       Just c -> c
+
+
+viewError: RequestStatus -> Html Msg
+viewError status =
+  let
+    msg = case status of
+      Loading -> "Sending..."
+      Failure e -> "Something went wrong: " ++ e
+      Success -> "Stuff was created!"
+      NotEvenHappenedYetAtAll -> ""
+  in
+    p [] [text msg]
