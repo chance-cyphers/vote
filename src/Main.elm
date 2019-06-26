@@ -133,14 +133,14 @@ view: Model -> Document Msg
 view model =
   { title = "Hi"
   , body =
-      [ pageContent model
-      ]
+    [ pageContent model
+    ]
   }
 
 pageContent : Model -> Html Msg
 pageContent model =
-    case model.pageModel of
-        HomeModel m -> Page.Home.view m
-        BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
-        CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
-        NotFoundModel -> h1 [] [ text "404 Page Not Found" ]
+  case model.pageModel of
+    HomeModel homeModel -> Page.Home.view homeModel
+    BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
+    CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
+    NotFoundModel -> h1 [] [ text "404 Page Not Found" ]
