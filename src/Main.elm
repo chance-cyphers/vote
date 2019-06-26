@@ -3,8 +3,6 @@ module Main exposing (..)
 import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Html exposing (Html, h1, text)
-import Http
-import Json.Decode as Decode
 import Page.Bracket exposing (Model, init)
 import Page.CreateTourney
 import Page.Home
@@ -28,10 +26,8 @@ type alias Model =
   { route: Route
   , pageModel: PageModel
   , key: Nav.Key
-  , links: Links
   }
 
-type alias Links = { allTourneys: Maybe String }
 
 type PageModel
   = HomeModel Page.Home.Model
@@ -47,24 +43,15 @@ init: () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
 init _ url navKey =
   let
     route = Route.parseRoute url
-    (pageModel, _) = initPageModel route
-  in
-    ( Model route pageModel navKey { allTourneys = Nothing }
-    , Http.get
-      { url = "https://tourney-service.herokuapp.com/tourney"
-      , expect = Http.expectJson GotLinks linksDecoder}
-    )
-
-linksDecoder: Decode.Decoder Links
-linksDecoder =
-  Decode.map Links (Decode.maybe (Decode.field "links" (Decode.field "allTourneysLink" Decode.string)))
+    (pageModel, pageCmd) = initPageModel route
+  in (Model route pageModel navKey, pageCmd)
 
 
-initPageModel : Route -> ( PageModel, Cmd Msg )
+initPageModel : Route -> (PageModel, Cmd Msg)
 initPageModel route =
   case route of
       Route.Home ->
-        let (homeModel, homeCmd) = Page.Home.init Nothing
+        let (homeModel, homeCmd) = Page.Home.init
         in (HomeModel homeModel, Cmd.map HomeMsg homeCmd)
       Route.Bracket ->
         let (bracketModel, bracketCmd) = Page.Bracket.init ()
@@ -83,7 +70,6 @@ type Msg
   | BracketMsg Page.Bracket.Msg
   | CreateTourneyMsg Page.CreateTourney.Msg
   | HomeMsg Page.Home.Msg
-  | GotLinks (Result Http.Error Links)
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -97,44 +83,27 @@ update msg model =
           ( model, Nav.load href )
 
     (UrlChanged url, _) ->
-      let
-        (route, pageModel, cmd) = updateRoute url model
-      in
-        ( { model | route = route, pageModel = pageModel }
-        , cmd
-        )
+      let (route, pageModel, cmd) = updateRoute url
+      in ( { model | route = route, pageModel = pageModel }, cmd)
 
     (BracketMsg bMsg, BracketModel bModel) ->
-      let
-        (newModel, newCmd) = Page.Bracket.update bMsg bModel
-      in
-        ({model | pageModel = BracketModel newModel}
-        , Cmd.map BracketMsg newCmd
-        )
+      let (newModel, newCmd) = Page.Bracket.update bMsg bModel
+      in ({model | pageModel = BracketModel newModel}, Cmd.map BracketMsg newCmd)
 
     (CreateTourneyMsg cMsg, CreateTourneyModel cModel) ->
-      let
-        (newModel, newCmd) = Page.CreateTourney.update cMsg cModel
-      in
-        ({model | pageModel = CreateTourneyModel newModel}
-        , Cmd.map CreateTourneyMsg newCmd
-        )
-    (GotLinks linksResult, _) ->
-      let _ = Debug.log "links" linksResult
-      in
-      case linksResult of
-        Ok links ->
-          case model.pageModel of
-            HomeModel m -> ({model | links = links, pageModel = HomeModel {m | allTourneysLink = links.allTourneys}}, Cmd.none)
-            _ -> ({model | links = links}, Cmd.none)
-        Err _ -> (model, Cmd.none)
+      let (newModel, newCmd) = Page.CreateTourney.update cMsg cModel
+      in ({model | pageModel = CreateTourneyModel newModel}, Cmd.map CreateTourneyMsg newCmd)
+
+    (HomeMsg hMsg, HomeModel hModel) ->
+      let (newModel, newCmd) = Page.Home.update hMsg hModel
+      in ({ model | pageModel = HomeModel newModel}, Cmd.map HomeMsg newCmd)
 
     (_, _) -> (model, Cmd.none)
 
 
 
-updateRoute: Url -> Model -> (Route, PageModel, Cmd Msg)
-updateRoute url model =
+updateRoute: Url -> (Route, PageModel, Cmd Msg)
+updateRoute url =
     let route = Route.parseRoute url
     in
       case route of
@@ -147,7 +116,7 @@ updateRoute url model =
           in (route, CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
 
         Home ->
-          let (homeModel, homeCmd) = Page.Home.init model.links.allTourneys
+          let (homeModel, homeCmd) = Page.Home.init
           in (Home, HomeModel homeModel, Cmd.map HomeMsg homeCmd)
 
         NotFound -> (NotFound, NotFoundModel, Cmd.none)

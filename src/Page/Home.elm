@@ -2,20 +2,44 @@ module Page.Home exposing (..)
 
 import Html exposing (Html, a, div, h1, li, p, text)
 import Html.Attributes exposing (href)
+import Http
+import Json.Decode as Decode
 
 
 type alias Model =
   { allTourneysLink: Maybe String
   }
 
-type Msg = Hi
+type Msg
+  = Hi
+  | GotLinks (Result Http.Error Links)
 
 
-init: Maybe String -> (Model, Cmd Msg)
-init allTourneysLink =
-  ( Model allTourneysLink
-  , Cmd.none
-  )
+
+init: (Model, Cmd Msg)
+init =
+  ( Model Nothing
+  , Http.get
+      { url = "https://tourney-service.herokuapp.com/tourney"
+      , expect = Http.expectJson GotLinks linksDecoder
+      }
+   )
+
+
+type alias Links = { allTourneys: Maybe String }
+linksDecoder: Decode.Decoder Links
+linksDecoder =
+  Decode.map Links (Decode.maybe (Decode.field "links" (Decode.field "allTourneysLink" Decode.string)))
+
+
+update: Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+  case msg of
+    GotLinks result->
+      case result of
+        Ok links -> ({model | allTourneysLink = links.allTourneys}, Cmd.none)
+        Err _ -> (model, Cmd.none)
+    Hi -> (model, Cmd.none)
 
 
 view: Model -> Html a
