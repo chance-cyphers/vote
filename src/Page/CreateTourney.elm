@@ -29,7 +29,7 @@ type RequestStatus
 init: (Model, Cmd Msg)
 init =
     ({ title = ""
-      , matchDuration = 0
+      , matchDuration = 1
       , characters = Dict.empty
       , requestStatus = NotEvenHappenedYetAtAll
       }
@@ -52,28 +52,29 @@ update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
       Hi -> (model, Cmd.none)
+
       Title title -> ({model | title = title}, Cmd.none)
+
       MatchDuration duration ->
         let
-          maybeDuration = toInt duration
-          parsedDuration = case maybeDuration of
+          parsedDuration = case toInt duration of
             Nothing -> 0
             Just x -> x
         in
           ({model | matchDuration = parsedDuration}, Cmd.none)
       Character pos name -> ({model | characters = Dict.insert pos name model.characters}, Cmd.none)
+
       Submit ->
-        let
-          body = tourneyEncoder model
-          _ = Debug.log "submit" body
-        in
-        ( { model | requestStatus = Loading }
-        , Http.post
-          { url = "https://tourney-service.herokuapp.com/tourney/tourney"
-          , body = Http.jsonBody <| tourneyEncoder model
-          , expect = Http.expectString CreatedTourney
-          }
-        )
+        if Dict.size model.characters == 16 then
+          ( { model | requestStatus = Loading }
+          , Http.post
+            { url = "https://tourney-service.herokuapp.com/tourney/tourney"
+            , body = Http.jsonBody <| tourneyEncoder model
+            , expect = Http.expectString CreatedTourney
+            }
+          )
+        else ({model | requestStatus = Failure "Must have 16 character names" }, Cmd.none)
+
       CreatedTourney result ->
         case result of
           Ok _ -> ({ model | requestStatus = Success }, Cmd.none)
