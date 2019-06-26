@@ -31,10 +31,10 @@ type alias Model =
   , links: Links
   }
 
-type alias Links = { allTourneys: String }
+type alias Links = { allTourneys: Maybe String }
 
 type PageModel
-  = HomeModel
+  = HomeModel Page.Home.Model
   | BracketModel Page.Bracket.Model
   | CreateTourneyModel Page.CreateTourney.Model
   | NotFoundModel
@@ -49,7 +49,7 @@ init _ url navKey =
     route = Route.parseRoute url
     (pageModel, _) = initPageModel route
   in
-    ( Model route pageModel navKey { allTourneys = "" }
+    ( Model route pageModel navKey { allTourneys = Nothing }
     , Http.get
       { url = "https://tourney-service.herokuapp.com/tourney"
       , expect = Http.expectJson GotLinks linksDecoder}
@@ -57,26 +57,23 @@ init _ url navKey =
 
 linksDecoder: Decode.Decoder Links
 linksDecoder =
-  Decode.map Links (Decode.field "links" (Decode.field "allTourneysLink" Decode.string))
+  Decode.map Links (Decode.maybe (Decode.field "links" (Decode.field "allTourneysLink" Decode.string)))
 
 
 initPageModel : Route -> ( PageModel, Cmd Msg )
 initPageModel route =
   case route of
       Route.Home ->
-        (HomeModel, Cmd.none)
+        let (homeModel, homeCmd) = Page.Home.init Nothing
+        in (HomeModel homeModel, Cmd.map HomeMsg homeCmd)
       Route.Bracket ->
-        let
-          (bracketModel, bracketCmd) = Page.Bracket.init ()
-        in
-          (BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
+        let (bracketModel, bracketCmd) = Page.Bracket.init ()
+        in (BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
       Route.CreateTourney ->
-        let
-          (createModel, createCmd) = Page.CreateTourney.init
-        in
-          (CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
+        let (createModel, createCmd) = Page.CreateTourney.init
+        in (CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
       Route.NotFound ->
-        (HomeModel, Cmd.none)
+        (NotFoundModel, Cmd.none)
 
 
 
@@ -85,6 +82,7 @@ type Msg
   | UrlChanged Url.Url
   | BracketMsg Page.Bracket.Msg
   | CreateTourneyMsg Page.CreateTourney.Msg
+  | HomeMsg Page.Home.Msg
   | GotLinks (Result Http.Error Links)
 
 
@@ -100,7 +98,7 @@ update msg model =
 
     (UrlChanged url, _) ->
       let
-        (route, pageModel, cmd) = updateRoute url
+        (route, pageModel, cmd) = updateRoute url model
       in
         ( { model | route = route, pageModel = pageModel }
         , cmd
@@ -121,33 +119,37 @@ update msg model =
         ({model | pageModel = CreateTourneyModel newModel}
         , Cmd.map CreateTourneyMsg newCmd
         )
-    (GotLinks links, _) ->
-      let _ = Debug.log "links" links
+    (GotLinks linksResult, _) ->
+      let _ = Debug.log "links" linksResult
       in
-      (model, Cmd.none)
+      case linksResult of
+        Ok links ->
+          case model.pageModel of
+            HomeModel m -> ({model | links = links, pageModel = HomeModel {m | allTourneysLink = links.allTourneys}}, Cmd.none)
+            _ -> ({model | links = links}, Cmd.none)
+        Err _ -> (model, Cmd.none)
 
     (_, _) -> (model, Cmd.none)
 
 
 
-updateRoute: Url -> (Route, PageModel, Cmd Msg)
-updateRoute url =
+updateRoute: Url -> Model -> (Route, PageModel, Cmd Msg)
+updateRoute url model =
     let route = Route.parseRoute url
     in
       case route of
         Bracket ->
-          let
-            (bracketModel, bracketCmd) = Page.Bracket.init ()
-            model = BracketModel bracketModel
-            command = Cmd.map BracketMsg bracketCmd
-          in
-            (route, model, command)
+          let (bracketModel, bracketCmd) = Page.Bracket.init ()
+          in (route, BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
+
         CreateTourney ->
-          let
-            (createModel, createCmd) = Page.CreateTourney.init
-          in
-            (route, CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
-        Home -> (Home, HomeModel, Cmd.none)
+          let (createModel, createCmd) = Page.CreateTourney.init
+          in (route, CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
+
+        Home ->
+          let (homeModel, homeCmd) = Page.Home.init model.links.allTourneys
+          in (Home, HomeModel homeModel, Cmd.map HomeMsg homeCmd)
+
         NotFound -> (NotFound, NotFoundModel, Cmd.none)
 
 
@@ -169,7 +171,7 @@ view model =
 pageContent : Model -> Html Msg
 pageContent model =
     case model.pageModel of
-        HomeModel -> Page.Home.view
+        HomeModel m -> Page.Home.view m
         BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
         CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
         NotFoundModel -> h1 [] [ text "404 Page Not Found" ]
