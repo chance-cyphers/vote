@@ -1,6 +1,6 @@
 module Page.Tourney exposing (..)
 
-import Html exposing (Html, div, h1, p, text)
+import Html exposing (Html, div, h1, h3, p, text)
 import Http
 import Json.Decode as Decode
 
@@ -14,6 +14,11 @@ type alias Model =
 type alias Tourney =
   { title: String
   , matchDuration: Int
+  , characters: List Character
+  }
+
+type alias Character =
+  { name: String
   }
 
 
@@ -35,9 +40,15 @@ fetchTourneyCmd link =
 
 tourneyDecoder: Decode.Decoder Tourney
 tourneyDecoder =
-  Decode.map2 Tourney
+  Decode.map3 Tourney
     (Decode.field "title" Decode.string)
     (Decode.field "match_duration" Decode.int)
+    (Decode.field "characters" (Decode.list characterDecoder))
+
+
+characterDecoder: Decode.Decoder Character
+characterDecoder =
+  Decode.map Character (Decode.field "name" Decode.string)
 
 
 type Msg
@@ -63,8 +74,7 @@ view model =
     Just tourney ->
       div
         []
-        [ h1 [] [ text "sup from tourney page" ]
-        , p [] [ text model.tourneyLink ]
-        , p [] [ text tourney.title ]
+        [ h1 [] [ text tourney.title ]
+        , div [] (List.map (\n -> p [] [text n.name]) tourney.characters)
         ]
 
