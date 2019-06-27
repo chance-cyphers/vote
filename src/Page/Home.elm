@@ -95,8 +95,3 @@ tourneyLink tourney =
     []
     [ a [ href ("#/tourney/?link=" ++ tourney.selfLink)] [ text tourney.title ] ]
 
-
-
-viewLink : String -> Html msg
-viewLink path =
-  p [] [ a [ href path ] [ text path ] ]
