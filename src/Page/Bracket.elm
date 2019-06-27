@@ -6,7 +6,7 @@ import Debug exposing (toString)
 import Html exposing (Html)
 import Json.Decode exposing (Decoder, field, list, map, map6, maybe, string)
 import Svg exposing (Svg, line, rect, svg, text_, tspan)
-import Svg.Attributes exposing (fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
+import Svg.Attributes exposing (class, fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
 
 main =
@@ -228,7 +228,7 @@ horizontalLine x y =
     , x2 <| String.fromInt (x + 170)
     , y1 <| String.fromInt y
     , y2 <| String.fromInt y
-    , stroke "magenta"
+    , class "bracket-line"
     , strokeWidth "3"
     , fill "none"
     ]
@@ -241,7 +241,7 @@ verticalLine x y size =
     , x2 <| String.fromInt x
     , y1 <| String.fromInt y
     , y2 <| String.fromInt (y + size)
-    , stroke "magenta"
+    , class "bracket-line"
     , strokeWidth "3"
     , fill "none"
     ]

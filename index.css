@@ -10,3 +10,8 @@ a:focus,
 a:active {
     color: whitesmoke;
 }
+
+
+.bracket-line {
+    stroke: magenta;
+}
