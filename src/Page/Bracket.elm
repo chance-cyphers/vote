@@ -118,42 +118,36 @@ view model =
       [ x "80"
       , y "80"
       , fontSize "16"
-      , fill "white"
       ]
       (render16 model.bracket.roundOf16)
     , text_
       [ x "80"
       , y "80"
       , fontSize "16"
-      , fill "white"
       ]
       (render8 model.bracket.roundOf8)
     , text_
       [ x "80"
       , y "80"
       , fontSize "16"
-      , fill "white"
       ]
       (renderSemis model.bracket.semiFinals)
     , text_
       [ x "80"
       , y "80"
       , fontSize "16"
-      , fill "white"
       ]
       (renderFinals model.bracket.finals)
     , text_
       [ x "80"
       , y "80"
       , fontSize "16"
-      , fill "white"
       ]
       [(renderWinner model.bracket.winner)]
     , text_
       [ x "80"
       , y "80"
       , fontSize "42"
-      , fill "white"
       ]
       [ tspan
         [ x "50%", y "110", textAnchor "middle"]
