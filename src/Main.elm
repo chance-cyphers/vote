@@ -84,7 +84,13 @@ update msg model =
       let (newModel, newCmd) = Page.Home.update hMsg hModel
       in ({ model | pageModel = HomeModel newModel}, Cmd.map HomeMsg newCmd)
 
-    (_, _) -> (model, Cmd.none)
+    (TourneyMsg tMsg, TourneyModel tModel) ->
+      let (newModel, newCmd) = Page.Tourney.update tMsg tModel
+      in ({model | pageModel = TourneyModel newModel}, Cmd.map TourneyMsg newCmd)
+
+    (_, _) ->
+      let _ = Debug.log "error" "could not match msg/model"
+      in (model, Cmd.none)
 
 
 
@@ -92,7 +98,7 @@ updateRoute: Url -> (Route, PageModel, Cmd Msg)
 updateRoute url =
     let route = Route.parseRoute url
     in
-      case route of
+      case Route.parseRoute url of
         Bracket ->
           let (bracketModel, bracketCmd) = Page.Bracket.init ()
           in (route, BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)

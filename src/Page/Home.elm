@@ -52,11 +52,9 @@ update msg model =
         Ok links -> ({model | allTourneysLink = Just links.allTourneys}, fetchTourneysCmd links.allTourneys)
         Err _ -> (model, Cmd.none)
     GotTourneys result ->
-      let _ = Debug.log "tourneys:" result
-      in
-        case result of
-          Ok tourneys -> ({model | tourneys = tourneys}, Cmd.none)
-          Err _ -> (model, Cmd.none)
+      case result of
+        Ok tourneys -> ({model | tourneys = tourneys}, Cmd.none)
+        Err _ -> (model, Cmd.none)
 
 
 fetchTourneysCmd: String -> Cmd Msg
