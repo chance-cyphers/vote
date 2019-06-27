@@ -7,6 +7,7 @@ import Page.Bracket exposing (Model, init)
 import Page.CreateTourney
 import Page.Tourney
 import Page.Home
+import Page.Vote
 import Url exposing (Url)
 import Route exposing (Route(..))
 
@@ -35,6 +36,7 @@ type PageModel
   | BracketModel Page.Bracket.Model
   | TourneyModel Page.Tourney.Model
   | CreateTourneyModel Page.CreateTourney.Model
+  | VoteModel Page.Vote.Model
   | NotFoundModel
 
 
@@ -54,6 +56,7 @@ type Msg
   | UrlChanged Url.Url
   | BracketMsg Page.Bracket.Msg
   | TourneyMsg Page.Tourney.Msg
+  | VoteMsg Page.Vote.Msg
   | CreateTourneyMsg Page.CreateTourney.Msg
   | HomeMsg Page.Home.Msg
 
@@ -88,6 +91,10 @@ update msg model =
       let (newModel, newCmd) = Page.Tourney.update tMsg tModel
       in ({model | pageModel = TourneyModel newModel}, Cmd.map TourneyMsg newCmd)
 
+    (VoteMsg vMsg, VoteModel vModel) ->
+      let (newModel, newCmd) = Page.Vote.update vMsg vModel
+      in ({model | pageModel = VoteModel newModel}, Cmd.map VoteMsg newCmd)
+
     (_, _) ->
       let _ = Debug.log "error" "could not match msg/model"
       in (model, Cmd.none)
@@ -118,6 +125,13 @@ updateRoute url =
               let (tourneyModel, tourneyCmd) = Page.Tourney.init link
               in (Tourney maybeLink, TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
 
+        Vote maybeLink ->
+          case maybeLink of
+            Nothing -> (NotFound, NotFoundModel, Cmd.none)
+            Just link ->
+              let (voteModel, voteCmd) = Page.Vote.init link
+              in (Vote maybeLink, VoteModel voteModel, Cmd.map VoteMsg voteCmd)
+
         NotFound -> (NotFound, NotFoundModel, Cmd.none)
 
 
@@ -143,4 +157,5 @@ pageContent model =
     BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
     TourneyModel tourneyModel -> Html.map TourneyMsg <| Page.Tourney.view tourneyModel
     CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
+    VoteModel voteModel -> Html.map VoteMsg <| Page.Vote.view voteModel
     NotFoundModel -> h1 [] [ text "404 Page Not Found" ]
