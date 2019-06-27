@@ -1,6 +1,6 @@
 module Page.Tourney exposing (..)
 
-import Html exposing (Html, a, div, h1, h3, p, text)
+import Html exposing (Html, a, br, div, h1, h3, p, text)
 import Html.Attributes exposing (href)
 import Http
 import Json.Decode as Decode
@@ -17,6 +17,7 @@ type alias Tourney =
   , matchDuration: Int
   , characters: List Character
   , currentMatchLink: String
+  , bracketLink: String
   }
 
 type alias Character =
@@ -42,11 +43,12 @@ fetchTourneyCmd link =
 
 tourneyDecoder: Decode.Decoder Tourney
 tourneyDecoder =
-  Decode.map4 Tourney
+  Decode.map5 Tourney
     (Decode.field "title" Decode.string)
     (Decode.field "match_duration" Decode.int)
     (Decode.field "characters" (Decode.list characterDecoder))
     (Decode.field "links" (Decode.field "currentMatch" Decode.string))
+    (Decode.field "links" (Decode.field "bracket" Decode.string))
 
 
 characterDecoder: Decode.Decoder Character
@@ -80,5 +82,7 @@ view model =
         [ h1 [] [ text tourney.title ]
         , div [] (List.map (\n -> p [] [text n.name]) tourney.characters)
         , a [ href ("#/vote?link=" ++ tourney.currentMatchLink) ] [ text "Vote" ]
+        , br [] []
+        , a [ href ("#/bracket?link=" ++ tourney.bracketLink) ] [ text "Bracket" ]
         ]
 
