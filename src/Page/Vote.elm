@@ -1,7 +1,8 @@
 module Page.Vote exposing (..)
 
 
-import Html exposing (Html, div, h1, p, text)
+import Html exposing (Html, button, div, h1, p, text)
+import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
 
@@ -19,6 +20,7 @@ type alias Match =
 
 type alias Character =
   { name: String
+  , voteLink: String
   }
 
 
@@ -45,12 +47,18 @@ matchDecoder =
 
 characterDecoder: Decode.Decoder Character
 characterDecoder =
-  Decode.map Character (Decode.field "name" Decode.string)
+  Decode.map2 Character
+    (Decode.field "name" Decode.string)
+    (Decode.field "voteLink" Decode.string)
 
 
 -- UPDATE
 
-type Msg = GotMatch (Result Http.Error Match)
+type Msg
+  = GotMatch (Result Http.Error Match)
+  | VoteCompleted (Result Http.Error String)
+  | Vote1
+  | Vote2
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -64,6 +72,35 @@ update msg model =
           let _ = Debug.log "error" e
           in (model, Cmd.none)
 
+    VoteCompleted result ->
+      case result of
+        Ok _ -> (model, Cmd.none)
+        Err e ->
+          let _ = Debug.log "error" e
+          in (model, Cmd.none)
+
+    Vote1 ->
+      case model.match of
+        Nothing -> (model, Cmd.none)
+        Just match -> (model, voteCmd (match.character1.voteLink ++ "?username=bob"))
+
+    Vote2 ->
+      case model.match of
+        Nothing -> (model, Cmd.none)
+        Just match -> (model, voteCmd (match.character2.voteLink ++ "?username=bob"))
+
+
+voteCmd: String -> Cmd Msg
+voteCmd link =
+  Http.request
+    { method = "PUT"
+    , headers = []
+    , url = link
+    , body = Http.emptyBody
+    , expect = Http.expectString VoteCompleted
+    , timeout = Nothing
+    , tracker = Nothing
+    }
 
 -- VIEW
 
@@ -75,7 +112,7 @@ view model =
       div
         []
         [ h1 [] [ text "Vote Page"]
-        , p [] [ text match.character1.name ]
+        , button [ onClick Vote1 ] [ text match.character1.name]
         , p [] [ text "VS" ]
-        , p [] [ text match.character2.name ]
+        , button [ onClick Vote2 ] [ text match.character2.name]
         ]
