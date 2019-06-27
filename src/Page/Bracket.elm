@@ -1,7 +1,6 @@
 module Page.Bracket exposing (Model, init, Msg, update, view)
 
 
-import Browser
 import Debug exposing (toString)
 import Html exposing (Html)
 import Json.Decode exposing (Decoder, field, list, map, map6, maybe, string)
@@ -9,13 +8,6 @@ import Svg exposing (Svg, line, rect, svg, text_, tspan)
 import Svg.Attributes exposing (class, fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
 
-main =
-  Browser.element
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
-    }
 
 type alias Model =
   { bracket: Bracket
@@ -40,8 +32,8 @@ type alias Contestant =
   { name: String }
 
 
-init: () -> (Model, Cmd Msg)
-init _ =
+init: String -> (Model, Cmd Msg)
+init bracketLink =
   ( { bracket =
       { title = ""
       , roundOf16 = Nothing
@@ -53,7 +45,7 @@ init _ =
     , status = Loading
     }
   , Http.get
-    { url = "https://tourney-service.herokuapp.com/tourney/bracket/example"
+    { url = bracketLink
     , expect = Http.expectJson GotBracket bracketDecoder
     }
   )

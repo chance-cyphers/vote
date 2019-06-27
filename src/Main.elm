@@ -106,9 +106,12 @@ updateRoute url =
     let route = Route.parseRoute url
     in
       case Route.parseRoute url of
-        Bracket ->
-          let (bracketModel, bracketCmd) = Page.Bracket.init ()
-          in (route, BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
+        Bracket maybeLink->
+          case maybeLink of
+            Nothing -> (NotFound, NotFoundModel, Cmd.none)
+            Just link ->
+              let (bracketModel, bracketCmd) = Page.Bracket.init link
+              in (route, BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
 
         CreateTourney ->
           let (createModel, createCmd) = Page.CreateTourney.init

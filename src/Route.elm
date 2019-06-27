@@ -6,7 +6,7 @@ import Url.Parser.Query as Query
 
 type Route
     = Home
-    | Bracket
+    | Bracket (Maybe String)
     | CreateTourney
     | Tourney (Maybe String)
     | Vote (Maybe String)
@@ -24,7 +24,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Home Parser.top
-        , Parser.map Bracket (s "bracket")
+        , Parser.map Bracket (s "bracket" <?> Query.string "link")
         , Parser.map Tourney (s "tourney" <?> Query.string "link")
         , Parser.map Vote (s "vote" <?> Query.string "link")
         , Parser.map CreateTourney (s "create")
