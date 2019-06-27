@@ -5,6 +5,7 @@ import Browser.Navigation as Nav
 import Html exposing (Html, h1, text)
 import Page.Bracket exposing (Model, init)
 import Page.CreateTourney
+import Page.Tourney
 import Page.Home
 import Url exposing (Url)
 import Route exposing (Route(..))
@@ -32,6 +33,7 @@ type alias Model =
 type PageModel
   = HomeModel Page.Home.Model
   | BracketModel Page.Bracket.Model
+  | TourneyModel Page.Tourney.Model
   | CreateTourneyModel Page.CreateTourney.Model
   | NotFoundModel
 
@@ -56,6 +58,9 @@ initPageModel route =
       Route.Bracket ->
         let (bracketModel, bracketCmd) = Page.Bracket.init ()
         in (BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
+      Route.Tourney link ->
+        let (tourneyModel, tourneyCmd) = Page.Tourney.init link
+        in (TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
       Route.CreateTourney ->
         let (createModel, createCmd) = Page.CreateTourney.init
         in (CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
@@ -68,6 +73,7 @@ type Msg
   = LinkClicked Browser.UrlRequest
   | UrlChanged Url.Url
   | BracketMsg Page.Bracket.Msg
+  | TourneyMsg Page.Tourney.Msg
   | CreateTourneyMsg Page.CreateTourney.Msg
   | HomeMsg Page.Home.Msg
 
@@ -119,6 +125,10 @@ updateRoute url =
           let (homeModel, homeCmd) = Page.Home.init
           in (Home, HomeModel homeModel, Cmd.map HomeMsg homeCmd)
 
+        Tourney maybeLink ->
+          let (tourneyModel, tourneyCmd) = Page.Tourney.init maybeLink
+          in (Tourney maybeLink, TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
+
         NotFound -> (NotFound, NotFoundModel, Cmd.none)
 
 
@@ -142,5 +152,6 @@ pageContent model =
   case model.pageModel of
     HomeModel homeModel -> Page.Home.view homeModel
     BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
+    TourneyModel tourneyModel -> Html.map TourneyMsg <| Page.Tourney.view tourneyModel
     CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
     NotFoundModel -> h1 [] [ text "404 Page Not Found" ]

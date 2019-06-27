@@ -1,6 +1,6 @@
 module Page.Home exposing (..)
 
-import Html exposing (Html, a, div, h1, li, p, text)
+import Html exposing (Html, a, div, h1, h3, li, p, text)
 import Html.Attributes exposing (href)
 import Http
 import Json.Decode as Decode
@@ -83,8 +83,16 @@ view model =
     [ h1 [] [ text "Home Page" ]
     , viewLink "#/bracket"
     , viewLink "#/create"
-    , div [] <| map (\n -> li [][text n.title]) model.tourneys
+    , h3 [] [ text "Tourneys" ]
+    , div [] <| map tourneyLink model.tourneys
     ]
+
+tourneyLink: Tourney -> Html msg
+tourneyLink tourney =
+  li
+    []
+    [ a [ href ("#/tourney/?link=https://poop.com")] [ text tourney.title ] ]
+
 
 
 viewLink : String -> Html msg
