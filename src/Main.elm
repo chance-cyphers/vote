@@ -58,9 +58,12 @@ initPageModel route =
       Route.Bracket ->
         let (bracketModel, bracketCmd) = Page.Bracket.init ()
         in (BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
-      Route.Tourney link ->
-        let (tourneyModel, tourneyCmd) = Page.Tourney.init link
-        in (TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
+      Route.Tourney maybeLink ->
+        case maybeLink of
+          Nothing -> (NotFoundModel, Cmd.none)
+          Just link ->
+            let (tourneyModel, tourneyCmd) = Page.Tourney.init link
+            in (TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
       Route.CreateTourney ->
         let (createModel, createCmd) = Page.CreateTourney.init
         in (CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
@@ -126,8 +129,11 @@ updateRoute url =
           in (Home, HomeModel homeModel, Cmd.map HomeMsg homeCmd)
 
         Tourney maybeLink ->
-          let (tourneyModel, tourneyCmd) = Page.Tourney.init maybeLink
-          in (Tourney maybeLink, TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
+          case maybeLink of
+            Nothing -> (NotFound, NotFoundModel, Cmd.none)
+            Just link ->
+              let (tourneyModel, tourneyCmd) = Page.Tourney.init link
+              in (Tourney maybeLink, TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
 
         NotFound -> (NotFound, NotFoundModel, Cmd.none)
 

@@ -16,6 +16,7 @@ type alias Model =
 
 type alias Tourney =
   { title: String
+  , selfLink: String
   }
 
 init: (Model, Cmd Msg)
@@ -29,6 +30,7 @@ init =
 
 
 type alias Links = { allTourneys: String }
+
 linksDecoder: Decode.Decoder Links
 linksDecoder =
   Decode.map Links (Decode.field "links" (Decode.field "allTourneysLink" Decode.string))
@@ -71,7 +73,9 @@ tourneysDecoder =
 
 tourneyDecoder: Decode.Decoder Tourney
 tourneyDecoder =
-  Decode.map Tourney (Decode.field "title" Decode.string)
+  Decode.map2 Tourney
+    (Decode.field "title" Decode.string)
+    (Decode.field "links" (Decode.field "self" Decode.string))
 
 
 
@@ -91,7 +95,7 @@ tourneyLink: Tourney -> Html msg
 tourneyLink tourney =
   li
     []
-    [ a [ href ("#/tourney/?link=https://poop.com")] [ text tourney.title ] ]
+    [ a [ href ("#/tourney/?link=" ++ tourney.selfLink)] [ text tourney.title ] ]
 
 
 
