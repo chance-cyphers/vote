@@ -44,31 +44,8 @@ type PageModel
 init: () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
 init _ url navKey =
   let
-    route = Route.parseRoute url
-    (pageModel, pageCmd) = initPageModel route
-  in (Model route pageModel navKey, pageCmd)
-
-
-initPageModel : Route -> (PageModel, Cmd Msg)
-initPageModel route =
-  case route of
-      Route.Home ->
-        let (homeModel, homeCmd) = Page.Home.init
-        in (HomeModel homeModel, Cmd.map HomeMsg homeCmd)
-      Route.Bracket ->
-        let (bracketModel, bracketCmd) = Page.Bracket.init ()
-        in (BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
-      Route.Tourney maybeLink ->
-        case maybeLink of
-          Nothing -> (NotFoundModel, Cmd.none)
-          Just link ->
-            let (tourneyModel, tourneyCmd) = Page.Tourney.init link
-            in (TourneyModel tourneyModel, Cmd.map TourneyMsg tourneyCmd)
-      Route.CreateTourney ->
-        let (createModel, createCmd) = Page.CreateTourney.init
-        in (CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
-      Route.NotFound ->
-        (NotFoundModel, Cmd.none)
+    (route, model, cmd) = updateRoute url
+  in (Model route model navKey, cmd)
 
 
 
