@@ -1,8 +1,9 @@
 module Page.Vote exposing (..)
 
 
-import Html exposing (Html, button, div, h1, p, text)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, h1, input, p, text)
+import Html.Attributes exposing (class, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
 
@@ -11,6 +12,7 @@ import Json.Decode as Decode
 type alias Model =
   { currentMatchLink: String
   , match: Maybe Match
+  , username: String
   }
 
 type alias Match =
@@ -27,7 +29,7 @@ type alias Character =
 -- INIT
 
 init: String -> (Model, Cmd Msg)
-init currentMatchLink = (Model currentMatchLink Nothing, fetchMatchCmd currentMatchLink)
+init currentMatchLink = (Model currentMatchLink Nothing "", fetchMatchCmd currentMatchLink)
 
 
 fetchMatchCmd: String -> Cmd Msg
@@ -59,6 +61,7 @@ type Msg
   | VoteCompleted (Result Http.Error String)
   | Vote1
   | Vote2
+  | Username String
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -82,12 +85,14 @@ update msg model =
     Vote1 ->
       case model.match of
         Nothing -> (model, Cmd.none)
-        Just match -> (model, voteCmd (match.character1.voteLink ++ "?username=bob"))
+        Just match -> (model, voteCmd (match.character1.voteLink ++ "?username=" ++ model.username))
 
     Vote2 ->
       case model.match of
         Nothing -> (model, Cmd.none)
-        Just match -> (model, voteCmd (match.character2.voteLink ++ "?username=bob"))
+        Just match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.username))
+
+    Username name -> ({model | username = name}, Cmd.none)
 
 
 voteCmd: String -> Cmd Msg
@@ -110,9 +115,9 @@ view model =
     Nothing -> div [] [ text "loading..." ]
     Just match ->
       div
-        []
+        [ class "vote-page" ]
         [ h1 [] [ text "Vote Page"]
         , button [ onClick Vote1 ] [ text match.character1.name]
-        , p [] [ text "VS" ]
+        , input [ type_ "text", placeholder "username", value model.username, onInput Username ] [ text "VS" ]
         , button [ onClick Vote2 ] [ text match.character2.name]
         ]
