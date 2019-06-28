@@ -11,7 +11,7 @@ import Json.Decode as Decode
 
 type alias Model =
   { currentMatchLink: String
-  , match: Maybe Match
+  , match: MatchStatus
   , username: String
   }
 
@@ -25,11 +25,16 @@ type alias Character =
   , voteLink: String
   }
 
+type MatchStatus
+ = Loading
+ | Success Match
+ | Expired
+
 
 -- INIT
 
 init: String -> (Model, Cmd Msg)
-init currentMatchLink = (Model currentMatchLink Nothing "", fetchMatchCmd currentMatchLink)
+init currentMatchLink = (Model currentMatchLink Loading "", fetchMatchCmd currentMatchLink)
 
 
 fetchMatchCmd: String -> Cmd Msg
@@ -70,27 +75,37 @@ update msg model =
     GotMatch result ->
       case result of
         Ok match ->
-          ({model | match = Just match}, Cmd.none)
+          ({model | match = Success match}, Cmd.none)
         Err e ->
-          let _ = Debug.log "error" e
-          in (model, Cmd.none)
+          case e of
+            Http.BadStatus status ->
+              if status == 404 then ({model | match = Expired}, Cmd.none)
+              else
+                let _ = Debug.log "error"
+                in (model, Cmd.none)
+            _ ->
+              let _ = Debug.log "error"
+              in (model, Cmd.none)
 
     VoteCompleted result ->
       case result of
         Ok _ -> (model, Cmd.none)
         Err e ->
-          let _ = Debug.log "error" e
-          in (model, Cmd.none)
+          case e of
+            _ ->
+              let _ = Debug.log "error" e
+              in (model, Cmd.none)
+
 
     Vote1 ->
       case model.match of
-        Nothing -> (model, Cmd.none)
-        Just match -> (model, voteCmd (match.character1.voteLink ++ "?username=" ++ model.username))
+        Success match -> (model, voteCmd (match.character1.voteLink ++ "?username=" ++ model.username))
+        _ -> (model, Cmd.none)
 
     Vote2 ->
       case model.match of
-        Nothing -> (model, Cmd.none)
-        Just match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.username))
+        Success match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.username))
+        _ -> (model, Cmd.none)
 
     Username name -> ({model | username = name}, Cmd.none)
 
@@ -112,8 +127,9 @@ voteCmd link =
 view: Model -> Html Msg
 view model =
   case model.match of
-    Nothing -> div [] [ text "loading..." ]
-    Just match ->
+    Loading -> div [] [ text "Loading..." ]
+    Expired -> div [] [ text "Match is expired" ]
+    Success match ->
       div
         [ class "vote-page" ]
         [ h1 [] [ text "Vote Page"]
