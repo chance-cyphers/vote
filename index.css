@@ -11,7 +11,10 @@ a:active {
     color: whitesmoke;
 }
 
-
 .bracket-line {
     stroke: magenta;
+}
+
+text {
+    fill: whitesmoke;
 }
