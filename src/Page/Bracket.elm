@@ -1,13 +1,13 @@
-module Page.Bracket exposing (Model, init, Msg, update, view)
+module Page.Bracket exposing (Model, init, Msg, update, view, subscriptions)
 
 
 import Debug exposing (toString)
 import Html exposing (Html)
 import Json.Decode exposing (Decoder, field, list, map, map6, maybe, string)
-import Svg exposing (Svg, line, rect, svg, text_, tspan)
-import Svg.Attributes exposing (class, fill, fontSize, height, preserveAspectRatio, stroke, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
+import Svg exposing (Svg, line, svg, text_, tspan)
+import Svg.Attributes exposing (class, fill, fontSize, height, preserveAspectRatio, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
-
+import Time
 
 type alias Model =
   { bracket: Bracket
@@ -24,9 +24,9 @@ type alias Bracket =
   }
 
 type FetchStatus
-    = Failure String
-    | Loading
-    | Success
+  = Failure String
+  | Loading
+  | Success
 
 type alias Contestant =
   { name: String }
@@ -69,6 +69,8 @@ bracketDecoder =
 
 type Msg
     = GotBracket(Result Http.Error Bracket)
+    | Tick Time.Posix
+
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -81,13 +83,15 @@ update msg model =
                     )
                 Err e ->
                     ({ model | status = Failure (toString e) }, Cmd.none)
+        Tick _ ->
+          let _ = Debug.log "time" "keeps on ticking"
+          in (model, Cmd.none)
 
 
 
 subscriptions: Model -> Sub Msg
-subscriptions model =
-  Sub.none
-
+subscriptions _ =
+  Time.every 3000 Tick
 
 
 view: Model -> Html Msg

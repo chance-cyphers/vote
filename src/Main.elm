@@ -141,7 +141,9 @@ updateRoute url =
 
 subscriptions: Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  case model.pageModel of
+    BracketModel bracketModel -> Sub.map BracketMsg <| Page.Bracket.subscriptions bracketModel
+    _ -> Sub.none
 
 
 
