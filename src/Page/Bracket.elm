@@ -12,6 +12,7 @@ import Time
 type alias Model =
   { bracket: Bracket
   , status : FetchStatus
+  , bracketLink: String
   }
 
 type alias Bracket =
@@ -43,12 +44,17 @@ init bracketLink =
       , winner = Nothing
       }
     , status = Loading
+    , bracketLink = bracketLink
     }
-  , Http.get
-    { url = bracketLink
-    , expect = Http.expectJson GotBracket bracketDecoder
-    }
+  , getBracketCmd bracketLink
   )
+
+getBracketCmd: String -> Cmd Msg
+getBracketCmd link =
+  Http.get
+      { url = link
+      , expect = Http.expectJson GotBracket bracketDecoder
+      }
 
 
 contestantDecoder: Decoder Contestant
@@ -83,9 +89,7 @@ update msg model =
                     )
                 Err e ->
                     ({ model | status = Failure (toString e) }, Cmd.none)
-        Tick _ ->
-          let _ = Debug.log "time" "keeps on ticking"
-          in (model, Cmd.none)
+        Tick _ -> (model, getBracketCmd model.bracketLink)
 
 
 
