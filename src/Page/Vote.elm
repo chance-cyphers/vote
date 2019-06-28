@@ -139,12 +139,11 @@ view: Model -> Html Msg
 view model =
   case model.match of
     Loading -> div [] [ text "Loading..." ]
-    Expired -> div [] [ text "Match is expired" ]
+    Expired -> div [] [ text "Voting has ended" ]
     Success match ->
       div
         [ class "vote-page" ]
-        [ h1 [] [ text "Vote Page"]
-        , button [ onClick Vote1 ] [ text match.character1.name]
-        , input [ type_ "text", placeholder "username", value model.username, onInput Username ] [ text "VS" ]
-        , button [ onClick Vote2 ] [ text match.character2.name]
+        [ div [ onClick Vote1, class "vote-top"] [ text match.character1.name ]
+        , input [ type_ "text", placeholder "username", value model.username, onInput Username ] []
+        , div [ onClick Vote2, class "vote-bottom"] [ text match.character2.name ]
         ]

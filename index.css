@@ -1,6 +1,7 @@
 body {
     background-color: #609;
     color: whitesmoke;
+    margin: 0;
 }
 
 a:link,
@@ -17,4 +18,34 @@ a:active {
 
 text {
     fill: whitesmoke;
+}
+
+.vote-page > .vote-top {
+    background-color: blueviolet;
+
+    cursor: pointer;
+    height: 50vh;
+    line-height: 50vh;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.vote-page > input {
+    position: absolute;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    top: 49vh;
+}
+
+.vote-page > .vote-bottom {
+    cursor: pointer;
+    height: 50vh;
+    line-height: 50vh;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
 }
