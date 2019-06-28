@@ -83,7 +83,6 @@ view: Model -> Html a
 view model =
   div []
     [ h1 [] [ text "Home Page" ]
-    , p [] [ a [ href "#/bracket?link=https://tourney-service.herokuapp.com/tourney/bracket/example" ] [ text "Example Bracket" ] ]
     , p [] [ a [ href "#/create" ] [ text "Create Tournament" ] ]
     , h3 [] [ text "Tourneys" ]
     , div [] <| map tourneyLink model.tourneys
