@@ -143,6 +143,7 @@ subscriptions: Model -> Sub Msg
 subscriptions model =
   case model.pageModel of
     BracketModel bracketModel -> Sub.map BracketMsg <| Page.Bracket.subscriptions bracketModel
+    VoteModel voteModel -> Sub.map VoteMsg <| Page.Vote.subscriptions voteModel
     _ -> Sub.none
 
 

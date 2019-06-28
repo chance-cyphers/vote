@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
+import Time
 
 
 
@@ -67,6 +68,7 @@ type Msg
   | Vote1
   | Vote2
   | Username String
+  | Tick Time.Posix
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -109,6 +111,8 @@ update msg model =
 
     Username name -> ({model | username = name}, Cmd.none)
 
+    Tick _ -> (model, fetchMatchCmd model.currentMatchLink)
+
 
 voteCmd: String -> Cmd Msg
 voteCmd link =
@@ -121,6 +125,13 @@ voteCmd link =
     , timeout = Nothing
     , tracker = Nothing
     }
+
+-- SUB
+
+subscriptions: Model -> Sub Msg
+subscriptions _ =
+  Time.every 10000 Tick
+
 
 -- VIEW
 
