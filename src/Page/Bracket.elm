@@ -68,7 +68,7 @@ bracketDecoder =
     (field "name" string)
     (maybe (field "roundOf16" (list contestantDecoder)))
     (maybe (field "roundOf8" (list contestantDecoder)))
-    (maybe (field "semiFinals" (list contestantDecoder)))
+    (maybe (field "semifinals" (list contestantDecoder)))
     (maybe (field "finals" (list contestantDecoder)))
     (maybe (field "winner" contestantDecoder))
 
