@@ -8,7 +8,6 @@ type Route
     = Home
     | Bracket (Maybe String)
     | CreateTourney
-    | Tourney (Maybe String)
     | Vote (Maybe String)
     | NotFound
 
@@ -25,7 +24,6 @@ parser =
     oneOf
         [ Parser.map Home Parser.top
         , Parser.map Bracket (s "bracket" <?> Query.string "link")
-        , Parser.map Tourney (s "tourney" <?> Query.string "link")
         , Parser.map Vote (s "vote" <?> Query.string "link")
         , Parser.map CreateTourney (s "create")
         ]

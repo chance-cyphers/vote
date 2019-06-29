@@ -1,6 +1,6 @@
 module Page.Home exposing (..)
 
-import Html exposing (Html, a, div, h1, h3, li, p, text)
+import Html exposing (Html, a, div, h1, h3, li, p, span, text)
 import Html.Attributes exposing (href)
 import Http
 import Json.Decode as Decode
@@ -17,6 +17,8 @@ type alias Model =
 type alias Tourney =
   { title: String
   , selfLink: String
+  , bracketLink: String
+  , matchLink: String
   }
 
 init: (Model, Cmd Msg)
@@ -71,9 +73,11 @@ tourneysDecoder =
 
 tourneyDecoder: Decode.Decoder Tourney
 tourneyDecoder =
-  Decode.map2 Tourney
+  Decode.map4 Tourney
     (Decode.field "title" Decode.string)
     (Decode.field "links" (Decode.field "self" Decode.string))
+    (Decode.field "links" (Decode.field "bracket" Decode.string))
+    (Decode.field "links" (Decode.field "currentMatch" Decode.string))
 
 
 
@@ -84,13 +88,16 @@ view model =
   div []
     [ h1 [] [ text "Home Page" ]
     , p [] [ a [ href "#/create" ] [ text "Create Tournament" ] ]
-    , h3 [] [ text "Tourneys" ]
-    , div [] <| map tourneyLink model.tourneys
+    , h3 [] [ text "Tournaments" ]
+    , div [] <| map tourneyItem model.tourneys
     ]
 
-tourneyLink: Tourney -> Html msg
-tourneyLink tourney =
+tourneyItem: Tourney -> Html msg
+tourneyItem tourney =
   li
     []
-    [ a [ href ("#/tourney/?link=" ++ tourney.selfLink)] [ text tourney.title ] ]
+    [ span [] [ text tourney.title ]
+    , a [ href ("#/bracket/?link=" ++ tourney.bracketLink)] [ text "bracket" ]
+    , a [ href ("#/vote/?link=" ++ tourney.matchLink)] [ text "vote" ]
+    ]
 
