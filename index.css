@@ -20,6 +20,19 @@ text {
     fill: whitesmoke;
 }
 
+
+/*HOME PAGE*/
+
+.home-page {
+    padding: 20px;
+}
+
+.home-page .tourney-link {
+    margin: 0 0 0 15px;
+}
+
+/*VOTE PAGE*/
+
 .vote-page > .vote-top {
     background-color: blueviolet;
 

@@ -1,7 +1,7 @@
 module Page.Home exposing (..)
 
 import Html exposing (Html, a, div, h1, h3, li, p, span, text)
-import Html.Attributes exposing (href)
+import Html.Attributes exposing (class, href)
 import Http
 import Json.Decode as Decode
 import List exposing (map)
@@ -85,7 +85,8 @@ tourneyDecoder =
 
 view: Model -> Html a
 view model =
-  div []
+  div
+    [ class "home-page" ]
     [ h1 [] [ text "Home Page" ]
     , p [] [ a [ href "#/create" ] [ text "Create Tournament" ] ]
     , h3 [] [ text "Tournaments" ]
@@ -97,7 +98,9 @@ tourneyItem tourney =
   li
     []
     [ span [] [ text tourney.title ]
-    , a [ href ("#/bracket/?link=" ++ tourney.bracketLink)] [ text "bracket" ]
-    , a [ href ("#/vote/?link=" ++ tourney.matchLink)] [ text "vote" ]
+    , a [ href ("#/bracket/?link=" ++ tourney.bracketLink), class "tourney-link" ]
+      [ text "bracket" ]
+    , a [ href ("#/vote/?link=" ++ tourney.matchLink), class "tourney-link" ]
+      [ text "vote" ]
     ]
 
