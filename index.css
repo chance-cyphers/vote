@@ -56,12 +56,9 @@ text {
     font-weight: bold;
 }
 
-.vote-page > input {
-    position: absolute;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    top: 49vh;
+.vote-page .selected {
+    border-color: magenta;
+    border-style: solid;
 }
 
 .vote-page > .vote-bottom {

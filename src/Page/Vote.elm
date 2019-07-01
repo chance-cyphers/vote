@@ -1,7 +1,7 @@
 module Page.Vote exposing (..)
 
 
-import Html exposing (Html, div, input, text)
+import Html exposing (Html, div, h2, input, text)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -14,6 +14,7 @@ type alias Model =
   { code: String
   , match: MatchStatus
   , name: String
+  , selectedIndex: Int
   }
 
 type alias Match =
@@ -41,6 +42,7 @@ init code name =
   ( { code = code
     , match = Loading
     , name = name
+    , selectedIndex = -1
     }
   , fetchMatchCmd code)
 
@@ -102,17 +104,16 @@ update msg model =
           case e of
             _ ->
               let _ = Debug.log "error" e
-              in (model, Cmd.none)
-
+              in ({model | selectedIndex = -1}, Cmd.none)
 
     Vote1 ->
       case model.match of
-        Success match -> (model, voteCmd (match.character1.voteLink ++ "?username=" ++ model.name))
+        Success match -> ({model | selectedIndex = 0}, voteCmd (match.character1.voteLink ++ "?username=" ++ model.name))
         _ -> (model, Cmd.none)
 
     Vote2 ->
       case model.match of
-        Success match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.name))
+        Success match -> ({model | selectedIndex = 1}, voteCmd (match.character2.voteLink ++ "?username=" ++ model.name))
         _ -> (model, Cmd.none)
 
     Tick _ -> (model, fetchMatchCmd model.code)
@@ -147,6 +148,6 @@ view model =
     Success match ->
       div
         [ class "vote-page" ]
-        [ div [ onClick Vote1, class "vote-top"] [ text match.character1.name ]
-        , div [ onClick Vote2, class "vote-bottom"] [ text match.character2.name ]
+        [ div [ onClick Vote1, class (if model.selectedIndex == 0 then "vote-top selected" else "vote-top") ] [ text match.character1.name ]
+        , div [ onClick Vote2, class (if model.selectedIndex == 1 then "vote-bottom selected" else "vote-bottom") ] [ text match.character2.name ]
         ]
