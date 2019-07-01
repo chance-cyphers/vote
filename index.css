@@ -31,8 +31,37 @@ text {
 /*HOME PAGE*/
 
 .home-page {
+    text-align: center;
+}
+
+.home-page .title-bar {
+    height: 100px;
+    background-color: blueviolet;
+}
+
+.home-page .title-bar > h1 {
+    padding-top: 20px;
+}
+
+.home-page .home-content {
+    background-color: #660099;
     padding: 20px;
 }
+
+.home-content .btn-primary {
+    background-color: magenta;
+    border-color: magenta;
+}
+
+.home-content .button-group {
+    margin-bottom: 16px;
+}
+
+.home-content .manage-link {
+    font-size: 12px;
+}
+
+/*MANAGE PAGE*/
 
 .manage-tourneys-page {
     padding: 20px;
