@@ -12,6 +12,13 @@ a:active {
     color: whitesmoke;
 }
 
+
+/*BRACKET PAGE*/
+
+.bracket-page .code-label {
+    fill: darkgrey;
+}
+
 .bracket-line {
     stroke: magenta;
 }

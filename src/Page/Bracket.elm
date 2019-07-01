@@ -3,7 +3,7 @@ module Page.Bracket exposing (Model, init, Msg, update, view, subscriptions)
 
 import Debug exposing (toString)
 import Html exposing (Html)
-import Json.Decode exposing (Decoder, field, list, map, map6, maybe, string)
+import Json.Decode as Decode
 import Svg exposing (Svg, line, svg, text_, tspan)
 import Svg.Attributes exposing (class, fill, fontSize, height, preserveAspectRatio, strokeWidth, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import Http exposing (Error)
@@ -22,6 +22,7 @@ type alias Bracket =
   , semiFinals: Maybe (List Contestant)
   , finals: Maybe (List Contestant)
   , winner: Maybe Contestant
+  , tourneyCode: String
   }
 
 type FetchStatus
@@ -33,6 +34,8 @@ type alias Contestant =
   { name: String }
 
 
+-- INIT
+
 init: String -> (Model, Cmd Msg)
 init bracketLink =
   ( { bracket =
@@ -42,6 +45,7 @@ init bracketLink =
       , semiFinals = Nothing
       , finals = Nothing
       , winner = Nothing
+      , tourneyCode = ""
       }
     , status = Loading
     , bracketLink = bracketLink
@@ -57,21 +61,25 @@ getBracketCmd link =
       }
 
 
-contestantDecoder: Decoder Contestant
+contestantDecoder: Decode.Decoder Contestant
 contestantDecoder =
-    map Contestant (field "name" string)
+    Decode.map Contestant (Decode.field "name" Decode.string)
 
 
-bracketDecoder: Decoder Bracket
+bracketDecoder: Decode.Decoder Bracket
 bracketDecoder =
-  map6 Bracket
-    (field "name" string)
-    (maybe (field "roundOf16" (list contestantDecoder)))
-    (maybe (field "roundOf8" (list contestantDecoder)))
-    (maybe (field "semifinals" (list contestantDecoder)))
-    (maybe (field "finals" (list contestantDecoder)))
-    (maybe (field "winner" contestantDecoder))
+  Decode.map7 Bracket
+    (Decode.field "name" Decode.string)
+    (Decode.maybe (Decode.field "roundOf16" (Decode.list contestantDecoder)))
+    (Decode.maybe (Decode.field "roundOf8" (Decode.list contestantDecoder)))
+    (Decode.maybe (Decode.field "semifinals" (Decode.list contestantDecoder)))
+    (Decode.maybe (Decode.field "finals" (Decode.list contestantDecoder)))
+    (Decode.maybe (Decode.field "winner" contestantDecoder))
+    (Decode.field "code" Decode.string)
 
+
+
+-- UPDATE
 
 type Msg
     = GotBracket(Result Http.Error Bracket)
@@ -98,6 +106,8 @@ subscriptions _ =
   Time.every 3000 Tick
 
 
+-- VIEW
+
 view: Model -> Html Msg
 view model =
   let
@@ -112,6 +122,7 @@ view model =
     , height "100%"
     , viewBox "0 0 1600 800"
     , preserveAspectRatio "none"
+    , class "bracket-page"
     ]
     [ renderBracket
      ,text_
@@ -152,6 +163,16 @@ view model =
       [ tspan
         [ x "50%", y "110", textAnchor "middle"]
         [ Svg.text headerText ]
+      ]
+    , text_
+      [ x "80"
+      , y "80"
+      , fontSize "24"
+      , class "code-label"
+      ]
+      [ tspan
+        [ x "50%", y "160", textAnchor "middle"]
+        [ Svg.text ("code: " ++ model.bracket.tourneyCode) ]
       ]
     ]
 
