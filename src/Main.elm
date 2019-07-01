@@ -159,7 +159,7 @@ view model =
 pageContent : Model -> Html Msg
 pageContent model =
   case model.pageModel of
-    HomeModel homeModel -> Page.Home.view homeModel
+    HomeModel homeModel -> Html.map HomeMsg <| Page.Home.view homeModel
     BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
     CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
     VoteModel voteModel -> Html.map VoteMsg <| Page.Vote.view voteModel
