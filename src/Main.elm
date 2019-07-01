@@ -6,6 +6,7 @@ import Html exposing (Html, h1, text)
 import Page.Bracket exposing (Model, init)
 import Page.CreateTourney
 import Page.Home
+import Page.ManageTourneys
 import Page.Vote
 import Url exposing (Url)
 import Route exposing (Route(..))
@@ -34,6 +35,7 @@ type PageModel
   = HomeModel Page.Home.Model
   | BracketModel Page.Bracket.Model
   | CreateTourneyModel Page.CreateTourney.Model
+  | ManageTourneysModel Page.ManageTourneys.Model
   | VoteModel Page.Vote.Model
   | NotFoundModel
 
@@ -54,6 +56,7 @@ type Msg
   | UrlChanged Url.Url
   | BracketMsg Page.Bracket.Msg
   | VoteMsg Page.Vote.Msg
+  | ManageTourneysMsg Page.ManageTourneys.Msg
   | CreateTourneyMsg Page.CreateTourney.Msg
   | HomeMsg Page.Home.Msg
 
@@ -88,6 +91,10 @@ update msg model =
       let (newModel, newCmd) = Page.Vote.update vMsg vModel
       in ({model | pageModel = VoteModel newModel}, Cmd.map VoteMsg newCmd)
 
+    (ManageTourneysMsg mMsg, ManageTourneysModel mModel) ->
+      let (newModel, newCmd) = Page.ManageTourneys.update mMsg mModel
+      in ({model | pageModel = ManageTourneysModel newModel}, Cmd.map ManageTourneysMsg newCmd)
+
     (_, _) ->
       let _ = Debug.log "error" "could not match msg/model"
       in (model, Cmd.none)
@@ -99,12 +106,19 @@ updateRoute url =
     let route = Route.parseRoute url
     in
       case Route.parseRoute url of
-        Bracket maybeLink->
+        Bracket maybeLink ->
           case maybeLink of
             Nothing -> (NotFound, NotFoundModel, Cmd.none)
             Just link ->
               let (bracketModel, bracketCmd) = Page.Bracket.init link
               in (route, BracketModel bracketModel, Cmd.map BracketMsg bracketCmd)
+
+        ManageTourneys maybeLink ->
+          case maybeLink of
+            Nothing -> (NotFound, NotFoundModel, Cmd.none)
+            Just link ->
+              let (manageModel, manageCmd) = Page.ManageTourneys.init link
+              in (route, ManageTourneysModel manageModel, Cmd.map ManageTourneysMsg manageCmd)
 
         CreateTourney ->
           let (createModel, createCmd) = Page.CreateTourney.init
@@ -136,7 +150,7 @@ subscriptions model =
 
 view: Model -> Document Msg
 view model =
-  { title = "Hi"
+  { title = "Vote for Stuff"
   , body =
     [ pageContent model
     ]
@@ -149,4 +163,5 @@ pageContent model =
     BracketModel bracketModel -> Html.map BracketMsg <| Page.Bracket.view bracketModel
     CreateTourneyModel createModel -> Html.map CreateTourneyMsg <| Page.CreateTourney.view createModel
     VoteModel voteModel -> Html.map VoteMsg <| Page.Vote.view voteModel
+    ManageTourneysModel manageModel -> Html.map ManageTourneysMsg <| Page.ManageTourneys.view manageModel
     NotFoundModel -> h1 [] [ text "404 Page Not Found" ]

@@ -85,13 +85,17 @@ tourneyDecoder =
 
 view: Model -> Html a
 view model =
-  div
-    [ class "home-page" ]
-    [ h1 [] [ text "Home Page" ]
-    , p [] [ a [ href "#/create" ] [ text "Create Tournament" ] ]
-    , h3 [] [ text "Tournaments" ]
-    , div [] <| map tourneyItem model.tourneys
-    ]
+  case model.allTourneysLink of
+    Nothing -> div [] [ text "loading..." ]
+    Just getLink ->
+      div
+        [ class "home-page" ]
+        [ h1 [] [ text "Home Page" ]
+        , p [] [ a [ href "#/create" ] [ text "Create Tournament" ] ]
+        , p [] [ a [ href ("#/manage?get-link=" ++ getLink) ] [ text "Manage Tournaments" ] ]
+        , h3 [] [ text "Tournaments" ]
+        , div [] <| map tourneyItem model.tourneys
+        ]
 
 tourneyItem: Tourney -> Html msg
 tourneyItem tourney =

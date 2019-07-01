@@ -1,13 +1,14 @@
 module Route exposing (..)
 
 import Url exposing (Url)
-import Url.Parser as Parser exposing ((</>), (<?>), Parser, oneOf, s, string)
+import Url.Parser as Parser exposing ((</>), (<?>), Parser, oneOf, s)
 import Url.Parser.Query as Query
 
 type Route
     = Home
     | Bracket (Maybe String)
     | CreateTourney
+    | ManageTourneys (Maybe String)
     | Vote (Maybe String)
     | NotFound
 
@@ -25,6 +26,7 @@ parser =
         [ Parser.map Home Parser.top
         , Parser.map Bracket (s "bracket" <?> Query.string "link")
         , Parser.map Vote (s "vote" <?> Query.string "link")
+        , Parser.map ManageTourneys (s "manage" <?> Query.string "get-link")
         , Parser.map CreateTourney (s "create")
         ]
 
