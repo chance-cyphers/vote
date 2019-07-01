@@ -80,7 +80,7 @@ tourneyItem tourney =
     [ span [] [ text tourney.title ]
     , a [ href ("#/bracket/?link=" ++ tourney.bracketLink), class "tourney-link" ]
       [ text "bracket" ]
-    , a [ href ("#/vote/?link=" ++ tourney.matchLink), class "tourney-link" ]
+    , a [ href ("#/vote/?link=" ++ tourney.matchLink ++ "&name=" ++ "bob"), class "tourney-link" ]
       [ text "vote" ]
     ]
 

@@ -128,12 +128,12 @@ updateRoute url =
           let (homeModel, homeCmd) = Page.Home.init
           in (Home, HomeModel homeModel, Cmd.map HomeMsg homeCmd)
 
-        Vote maybeLink ->
-          case maybeLink of
-            Nothing -> (NotFound, NotFoundModel, Cmd.none)
-            Just link ->
-              let (voteModel, voteCmd) = Page.Vote.init link
-              in (Vote maybeLink, VoteModel voteModel, Cmd.map VoteMsg voteCmd)
+        Vote maybeLink maybeName->
+          case (maybeLink, maybeName) of
+            (Just link, Just name) ->
+              let (voteModel, voteCmd) = Page.Vote.init link name
+              in (Vote maybeLink maybeName, VoteModel voteModel, Cmd.map VoteMsg voteCmd)
+            (_, _) -> (NotFound, NotFoundModel, Cmd.none)
 
         NotFound -> (NotFound, NotFoundModel, Cmd.none)
 

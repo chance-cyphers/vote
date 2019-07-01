@@ -1,7 +1,7 @@
 module Page.Vote exposing (..)
 
 
-import Html exposing (Html, button, div, h1, input, p, text)
+import Html exposing (Html, div, input, text)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -34,8 +34,11 @@ type MatchStatus
 
 -- INIT
 
-init: String -> (Model, Cmd Msg)
-init currentMatchLink = (Model currentMatchLink Loading "", fetchMatchCmd currentMatchLink)
+init: String -> String -> (Model, Cmd Msg)
+init currentMatchLink name =
+  let _ = Debug.log "name" name
+  in
+  (Model currentMatchLink Loading name, fetchMatchCmd currentMatchLink)
 
 
 fetchMatchCmd: String -> Cmd Msg
@@ -67,7 +70,6 @@ type Msg
   | VoteCompleted (Result Http.Error String)
   | Vote1
   | Vote2
-  | Username String
   | Tick Time.Posix
 
 
@@ -109,8 +111,6 @@ update msg model =
         Success match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.username))
         _ -> (model, Cmd.none)
 
-    Username name -> ({model | username = name}, Cmd.none)
-
     Tick _ -> (model, fetchMatchCmd model.currentMatchLink)
 
 
@@ -144,6 +144,5 @@ view model =
       div
         [ class "vote-page" ]
         [ div [ onClick Vote1, class "vote-top"] [ text match.character1.name ]
-        , input [ type_ "text", placeholder "username", value model.username, onInput Username ] []
         , div [ onClick Vote2, class "vote-bottom"] [ text match.character2.name ]
         ]
