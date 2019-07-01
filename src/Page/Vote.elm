@@ -14,7 +14,7 @@ type alias Model =
   { code: String
   , match: MatchStatus
   , name: String
-  , selectedIndex: Int
+  , selectedName: String
   }
 
 type alias Match =
@@ -42,7 +42,7 @@ init code name =
   ( { code = code
     , match = Loading
     , name = name
-    , selectedIndex = -1
+    , selectedName = ""
     }
   , fetchMatchCmd code)
 
@@ -104,16 +104,16 @@ update msg model =
           case e of
             _ ->
               let _ = Debug.log "error" e
-              in ({model | selectedIndex = -1}, Cmd.none)
+              in ({model | selectedName = ""}, Cmd.none)
 
     Vote1 ->
       case model.match of
-        Success match -> ({model | selectedIndex = 0}, voteCmd (match.character1.voteLink ++ "?username=" ++ model.name))
+        Success match -> ({model | selectedName = match.character1.name }, voteCmd (match.character1.voteLink ++ "?username=" ++ model.name))
         _ -> (model, Cmd.none)
 
     Vote2 ->
       case model.match of
-        Success match -> ({model | selectedIndex = 1}, voteCmd (match.character2.voteLink ++ "?username=" ++ model.name))
+        Success match -> ({model | selectedName = match.character2.name }, voteCmd (match.character2.voteLink ++ "?username=" ++ model.name))
         _ -> (model, Cmd.none)
 
     Tick _ -> (model, fetchMatchCmd model.code)
@@ -148,6 +148,6 @@ view model =
     Success match ->
       div
         [ class "vote-page" ]
-        [ div [ onClick Vote1, class (if model.selectedIndex == 0 then "vote-top selected" else "vote-top") ] [ text match.character1.name ]
-        , div [ onClick Vote2, class (if model.selectedIndex == 1 then "vote-bottom selected" else "vote-bottom") ] [ text match.character2.name ]
+        [ div [ onClick Vote1, class (if match.character1.name == model.selectedName then "vote-top selected" else "vote-top") ] [ text match.character1.name ]
+        , div [ onClick Vote2, class (if match.character2.name == model.selectedName then "vote-bottom selected" else "vote-bottom") ] [ text match.character2.name ]
         ]
