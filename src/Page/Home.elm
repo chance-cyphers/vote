@@ -11,19 +11,12 @@ import List exposing (map)
 
 type alias Model =
   { allTourneysLink: Maybe String
-  , tourneys: List Tourney
   }
 
-type alias Tourney =
-  { title: String
-  , selfLink: String
-  , bracketLink: String
-  , matchLink: String
-  }
 
 init: (Model, Cmd Msg)
 init =
-  ( Model Nothing []
+  ( Model Nothing
   , Http.get
       { url = "https://tourney-service.herokuapp.com/tourney"
       , expect = Http.expectJson GotLinks linksDecoder
@@ -43,7 +36,6 @@ linksDecoder =
 
 type Msg
   = GotLinks (Result Http.Error Links)
-  | GotTourneys (Result Http.Error (List Tourney))
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -51,34 +43,8 @@ update msg model =
   case msg of
     GotLinks result->
       case result of
-        Ok links -> ({model | allTourneysLink = Just links.allTourneys}, fetchTourneysCmd links.allTourneys)
+        Ok links -> ({model | allTourneysLink = Just links.allTourneys}, Cmd.none)
         Err _ -> (model, Cmd.none)
-    GotTourneys result ->
-      case result of
-        Ok tourneys -> ({model | tourneys = tourneys}, Cmd.none)
-        Err _ -> (model, Cmd.none)
-
-
-fetchTourneysCmd: String -> Cmd Msg
-fetchTourneysCmd link =
-  Http.get
-    { url = link
-    , expect = Http.expectJson GotTourneys tourneysDecoder
-    }
-
-tourneysDecoder: Decode.Decoder (List Tourney)
-tourneysDecoder =
-  Decode.list tourneyDecoder
-
-
-tourneyDecoder: Decode.Decoder Tourney
-tourneyDecoder =
-  Decode.map4 Tourney
-    (Decode.field "title" Decode.string)
-    (Decode.field "links" (Decode.field "self" Decode.string))
-    (Decode.field "links" (Decode.field "bracket" Decode.string))
-    (Decode.field "links" (Decode.field "currentMatch" Decode.string))
-
 
 
 -- VIEW
@@ -91,20 +57,5 @@ view model =
       div
         [ class "home-page" ]
         [ h1 [] [ text "Home Page" ]
-        , p [] [ a [ href "#/create" ] [ text "Create Tournament" ] ]
         , p [] [ a [ href ("#/manage?get-link=" ++ getLink) ] [ text "Manage Tournaments" ] ]
-        , h3 [] [ text "Tournaments" ]
-        , div [] <| map tourneyItem model.tourneys
         ]
-
-tourneyItem: Tourney -> Html msg
-tourneyItem tourney =
-  li
-    []
-    [ span [] [ text tourney.title ]
-    , a [ href ("#/bracket/?link=" ++ tourney.bracketLink), class "tourney-link" ]
-      [ text "bracket" ]
-    , a [ href ("#/vote/?link=" ++ tourney.matchLink), class "tourney-link" ]
-      [ text "vote" ]
-    ]
-
