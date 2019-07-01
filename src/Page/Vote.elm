@@ -11,9 +11,9 @@ import Time
 
 
 type alias Model =
-  { currentMatchLink: String
+  { code: String
   , match: MatchStatus
-  , username: String
+  , name: String
   }
 
 type alias Match =
@@ -35,16 +35,20 @@ type MatchStatus
 -- INIT
 
 init: String -> String -> (Model, Cmd Msg)
-init currentMatchLink name =
+init code name =
   let _ = Debug.log "name" name
   in
-  (Model currentMatchLink Loading name, fetchMatchCmd currentMatchLink)
+  ( { code = code
+    , match = Loading
+    , name = name
+    }
+  , fetchMatchCmd code)
 
 
 fetchMatchCmd: String -> Cmd Msg
-fetchMatchCmd link =
+fetchMatchCmd code =
   Http.get
-    { url = link
+    { url = ("https://tourney-service.herokuapp.com/tourney/tourney/current-match?code=" ++ code)
     , expect = Http.expectJson GotMatch matchDecoder
     }
 
@@ -103,15 +107,15 @@ update msg model =
 
     Vote1 ->
       case model.match of
-        Success match -> (model, voteCmd (match.character1.voteLink ++ "?username=" ++ model.username))
+        Success match -> (model, voteCmd (match.character1.voteLink ++ "?username=" ++ model.name))
         _ -> (model, Cmd.none)
 
     Vote2 ->
       case model.match of
-        Success match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.username))
+        Success match -> (model, voteCmd (match.character2.voteLink ++ "?username=" ++ model.name))
         _ -> (model, Cmd.none)
 
-    Tick _ -> (model, fetchMatchCmd model.currentMatchLink)
+    Tick _ -> (model, fetchMatchCmd model.code)
 
 
 voteCmd: String -> Cmd Msg

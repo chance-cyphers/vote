@@ -46,7 +46,7 @@ type PageModel
 init: () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
 init _ url navKey =
   let
-    (route, model, cmd) = updateRoute url
+    (route, model, cmd) = updateRoute url navKey
   in (Model route model navKey, cmd)
 
 
@@ -72,7 +72,7 @@ update msg model =
           ( model, Nav.load href )
 
     (UrlChanged url, _) ->
-      let (route, pageModel, cmd) = updateRoute url
+      let (route, pageModel, cmd) = updateRoute url model.key
       in ( { model | route = route, pageModel = pageModel }, cmd)
 
     (BracketMsg bMsg, BracketModel bModel) ->
@@ -101,8 +101,8 @@ update msg model =
 
 
 
-updateRoute: Url -> (Route, PageModel, Cmd Msg)
-updateRoute url =
+updateRoute: Url -> Nav.Key -> (Route, PageModel, Cmd Msg)
+updateRoute url key =
     let route = Route.parseRoute url
     in
       case Route.parseRoute url of
@@ -125,14 +125,14 @@ updateRoute url =
           in (route, CreateTourneyModel createModel, Cmd.map CreateTourneyMsg createCmd)
 
         Home ->
-          let (homeModel, homeCmd) = Page.Home.init
+          let (homeModel, homeCmd) = Page.Home.init key
           in (Home, HomeModel homeModel, Cmd.map HomeMsg homeCmd)
 
-        Vote maybeLink maybeName->
-          case (maybeLink, maybeName) of
-            (Just link, Just name) ->
-              let (voteModel, voteCmd) = Page.Vote.init link name
-              in (Vote maybeLink maybeName, VoteModel voteModel, Cmd.map VoteMsg voteCmd)
+        Vote maybeCode maybeName->
+          case (maybeCode, maybeName) of
+            (Just code, Just name) ->
+              let (voteModel, voteCmd) = Page.Vote.init code name
+              in (Vote maybeCode maybeName, VoteModel voteModel, Cmd.map VoteMsg voteCmd)
             (_, _) -> (NotFound, NotFoundModel, Cmd.none)
 
         NotFound -> (NotFound, NotFoundModel, Cmd.none)

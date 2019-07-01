@@ -1,5 +1,6 @@
 module Page.Home exposing (..)
 
+import Browser.Navigation as Nav
 import Html exposing (Html, a, br, button, div, h1, h3, input, label, li, p, span, text)
 import Html.Attributes exposing (class, href, placeholder, value)
 import Html.Events exposing (onClick, onInput)
@@ -10,16 +11,26 @@ import Json.Decode as Decode
 -- INIT
 
 type alias Model =
-  { allTourneysLink: Maybe String
+  { allTourneysLink: String
   , code: String
   , name: String
   , errorText: String
+  , key: Nav.Key
+  , status: PageStatus
   }
 
+type PageStatus = Loading | Success
 
-init: (Model, Cmd Msg)
-init =
-  ( Model Nothing "" "" ""
+
+init: Nav.Key -> (Model, Cmd Msg)
+init key =
+  ( { allTourneysLink = ""
+    , code = ""
+    , name = ""
+    , errorText = ""
+    , key = key
+    , status = Loading
+    }
   , Http.get
       { url = "https://tourney-service.herokuapp.com/tourney"
       , expect = Http.expectJson GotLinks linksDecoder
@@ -49,7 +60,7 @@ update msg model =
   case msg of
     GotLinks result->
       case result of
-        Ok links -> ({model | allTourneysLink = Just links.allTourneys}, Cmd.none)
+        Ok links -> ({model | allTourneysLink = links.allTourneys, status = Success}, Cmd.none)
         Err _ -> (model, Cmd.none)
 
     Code code ->
@@ -60,15 +71,15 @@ update msg model =
 
     Submit ->
       if String.isEmpty model.name then ({model | errorText = "You must enter a name"}, Cmd.none)
-      else (model, Cmd.none)
+      else (model, Nav.pushUrl model.key ("#/vote/?code=" ++ model.code ++ "&name=" ++ model.name))
 
 -- VIEW
 
 view: Model -> Html Msg
 view model =
-  case model.allTourneysLink of
-    Nothing -> div [] [ text "loading..." ]
-    Just getLink ->
+  case model.status of
+    Loading -> div [] [ text "loading..." ]
+    Success ->
       div
         [ class "home-page" ]
         [ h1 [] [ text "Home Page" ]
@@ -84,5 +95,5 @@ view model =
           ]
         , button [ onClick Submit ] [ text "VOTE" ]
         , p [ class "error-text" ] [ text model.errorText ]
-        , p [ class "manage-link" ] [ a [ href ("#/manage?get-link=" ++ getLink) ] [ text "Manage Tournaments" ] ]
+        , p [ class "manage-link" ] [ a [ href ("#/manage?get-link=" ++ model.allTourneysLink) ] [ text "Manage Tournaments" ] ]
         ]

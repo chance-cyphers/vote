@@ -25,7 +25,7 @@ parser =
     oneOf
         [ Parser.map Home Parser.top
         , Parser.map Bracket (s "bracket" <?> Query.string "link")
-        , Parser.map Vote (s "vote" <?> Query.string "link" <?> Query.string "name")
+        , Parser.map Vote (s "vote" <?> Query.string "code" <?> Query.string "name")
         , Parser.map ManageTourneys (s "manage" <?> Query.string "get-link")
         , Parser.map CreateTourney (s "create")
         ]
